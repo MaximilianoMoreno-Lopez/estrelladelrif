@@ -1,0 +1,165 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
+import { LEGAL_VERSION, LEGAL_VERSION_LABEL } from '../lib/legal.js';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const correo = `<a href="mailto:${site.email}">${site.email}</a>`;
+const sede = `${site.address.street}, ${site.address.postalCode} ${site.address.city} (España)`;
+
+// Mismo patron que privacidad.astro y accesibilidad.astro: el texto vive en un
+// array de secciones para que el diff del commit que sube LEGAL_VERSION ensene
+// solo el cambio de redaccion. Ver el comentario largo de privacidad.astro.
+const secciones = [
+  {
+    h: '1. Titularidad del sitio web',
+    p: [
+      `En cumplimiento del deber de información de la Ley 34/2002, de 11 de julio, de servicios de la sociedad de la información y de comercio electrónico (LSSI-CE), se hace constar que este sitio web, publicado en el dominio <strong>${site.domain}</strong>, es titularidad de la asociación <strong>${site.legalName}</strong>, entidad juvenil sin ánimo de lucro constituida en ${site.founded}, con NIF ${site.nif} y domicilio en ${sede}.`,
+      `Correo de contacto: ${correo}. Teléfono: <a href="tel:${site.phoneHref}">${site.phone}</a>. Código de organización Erasmus+ (OID): ${site.oid}.`,
+    ],
+  },
+  {
+    h: '2. Objeto y aceptación',
+    p: [
+      'Estas condiciones regulan el acceso, la navegación y el uso de este sitio web, cuya finalidad es exclusivamente informativa: dar a conocer la actividad de la asociación, sus proyectos y las oportunidades europeas abiertas a la juventud de Melilla.',
+      'El acceso al sitio es libre y gratuito, y atribuye la condición de usuaria o usuario, lo que implica la aceptación de estas condiciones en la versión publicada en cada momento. Si no estás de acuerdo con ellas, te pedimos que no utilices el sitio.',
+    ],
+  },
+  {
+    h: '3. Uso del sitio web',
+    p: [
+      'Te comprometes a hacer un uso diligente del sitio y, en particular, a no:',
+      '<ul>' +
+        '<li>utilizarlo con fines o efectos ilícitos, o contrarios a estas condiciones, a la buena fe o al orden público;</li>' +
+        '<li>intentar acceder a áreas no públicas, alterar el contenido publicado o interferir en el funcionamiento del servicio;</li>' +
+        '<li>introducir o difundir programas o dispositivos que puedan causar daños en los sistemas de la asociación, de su proveedor de alojamiento o de otras personas usuarias;</li>' +
+        '<li>emplear medios automatizados de extracción masiva de contenidos que degraden el servicio para el resto.</li>' +
+      '</ul>',
+      'La asociación puede modificar, suspender o retirar en cualquier momento, y sin aviso previo, los contenidos y servicios del sitio, así como su presentación y configuración.',
+    ],
+  },
+  {
+    h: '4. Propiedad intelectual e industrial',
+    p: [
+      `Los textos, el diseño, la marca, los logotipos, las imágenes, los gráficos y el código fuente de este sitio son titularidad de ${site.name} o se utilizan con la autorización de sus titulares, y están protegidos por la normativa española y de la Unión Europea sobre propiedad intelectual e industrial.`,
+      'Está permitido citar y enlazar los contenidos indicando la fuente y el enlace original. Cualquier otra reproducción, distribución, comunicación pública o transformación, total o parcial, requiere autorización previa por escrito de la asociación. Las publicaciones y los materiales educativos que se produzcan en el marco de los proyectos financiados por Erasmus+ se difundirán con licencia abierta cuando así lo exijan las condiciones del programa, y en cada caso se indicará la licencia aplicable en el propio material.',
+      'El <strong>emblema de la Unión Europea</strong> y la mención «Cofinanciado por la Unión Europea» se utilizan únicamente para identificar los proyectos que reciben financiación europea, conforme a las normas de visibilidad, transparencia y comunicación del programa Erasmus+ y a las directrices de uso del emblema europeo. Su presencia en una página de este sitio no implica que el conjunto de la actividad de la asociación esté cofinanciado, ni supone que la Unión Europea respalde los contenidos: las opiniones expresadas son responsabilidad exclusiva de la asociación y no reflejan necesariamente la posición de la Unión Europea ni de la Agencia Nacional Erasmus+.',
+      'Los nombres, marcas y logotipos de terceros que puedan aparecer en el sitio pertenecen a sus respectivos titulares y se muestran a título meramente informativo.',
+    ],
+  },
+  {
+    h: '5. Enlaces externos',
+    p: [
+      'Este sitio incluye enlaces a páginas de terceros —instituciones europeas, agencias nacionales, entidades socias y medios de comunicación— con fines informativos y de acreditación de fuentes. La asociación no controla esos sitios y no asume responsabilidad alguna por sus contenidos, por su disponibilidad ni por el tratamiento que hagan de tus datos, que se rige por sus propias políticas.',
+      'La existencia de un enlace no implica relación, asociación ni respaldo entre la asociación y el titular del sitio enlazado. Si detectas un enlace a un contenido ilícito o inapropiado, escríbenos y lo retiraremos.',
+      `Puedes enlazar a este sitio sin autorización previa siempre que el enlace lleve a la página completa, sin reproducirla dentro de otro marco, sin dar a entender una relación inexistente y sin acompañarse de manifestaciones falsas o inexactas sobre la asociación. La asociación puede solicitar la retirada de cualquier enlace que no respete estas condiciones escribiendo a ${correo}.`,
+    ],
+  },
+  {
+    h: '6. Limitación de responsabilidad',
+    p: [
+      'La asociación mantiene este sitio con la mayor diligencia y procura que la información publicada sea exacta y esté actualizada, pero no puede garantizar la ausencia de errores materiales, de omisiones ni de contenidos desactualizados. La información sobre plazos, requisitos y convocatorias tiene carácter orientativo: la referencia válida es siempre la publicación oficial de la convocatoria y las bases de la agencia o administración competente.',
+      'La asociación no responde de los daños derivados de la falta de disponibilidad o de la interrupción del servicio, de fallos de la red o del proveedor de alojamiento, ni del uso indebido del sitio por parte de terceros. Tampoco responde de los daños causados por virus o programas maliciosos ajenos a su control, sin perjuicio de que adopte medidas razonables para evitarlos.',
+      'Nada de lo anterior limita la responsabilidad que la normativa aplicable imponga con carácter imperativo.',
+    ],
+  },
+  {
+    h: '7. Protección de datos',
+    p: [
+      `El tratamiento de datos personales se rige por la <a href="${base}/privacidad/">política de privacidad</a>, que forma parte de estas condiciones. Este sitio web no utiliza cookies propias, no tiene analítica y no incorpora formularios.`,
+    ],
+  },
+  {
+    h: '8. Nulidad parcial',
+    p: [
+      'Si alguna de estas condiciones fuese declarada nula o ineficaz, se tendrá por no puesta y el resto seguirá siendo válido y exigible.',
+    ],
+  },
+  {
+    h: '9. Legislación aplicable y jurisdicción',
+    p: [
+      'Estas condiciones se rigen por la <strong>legislación española</strong>. Para cualquier controversia relativa al sitio web serán competentes los juzgados y tribunales que correspondan según la normativa procesal aplicable y, cuando la ley lo permita, los del domicilio de la asociación en Melilla.',
+      'La asociación puede modificar estas condiciones en cualquier momento; la versión aplicable es la publicada en esta página en el momento del acceso, identificada por la versión y la fecha que figuran arriba.',
+    ],
+  },
+];
+
+const esLista = (html: string) => html.startsWith('<ul');
+---
+
+<BaseLayout
+  title="Términos de uso"
+  description={`Condiciones que regulan el acceso y el uso del sitio web de ${site.name}: titularidad, propiedad intelectual, enlaces externos y legislación aplicable.`}
+  breadcrumbs={[
+    { name: 'Inicio', url: '/' },
+    { name: 'Términos de uso', url: '/terminos/' },
+  ]}
+>
+  <div class="page-hero">
+    <div class="container page-hero-content">
+      <span class="badge badge-white fade-in">Aviso legal</span>
+      <h1 class="fade-in fade-in-delay-1">Términos de uso</h1>
+      <p class="fade-in fade-in-delay-2">
+        Condiciones que regulan el acceso y el uso de este sitio web, y datos
+        identificativos de la asociación titular.
+      </p>
+    </div>
+  </div>
+
+  <section class="section" aria-label="Texto de los términos de uso">
+    <div class="container-estrecho">
+      <p class="legal-vigencia fade-in">
+        Versión {LEGAL_VERSION} · en vigor desde el {LEGAL_VERSION_LABEL}.
+      </p>
+
+      <div class="prosa legal-cuerpo fade-in">
+        {secciones.map((s) => (
+          <div class="legal-bloque">
+            <h2>{s.h}</h2>
+            {s.p.map((parrafo) =>
+              esLista(parrafo) ? <div class="legal-lista" set:html={parrafo} /> : <p set:html={parrafo} />,
+            )}
+          </div>
+        ))}
+      </div>
+
+      <p class="legal-pie fade-in">
+        Consulta también la <a href={`${base}/privacidad/`}>política de privacidad</a> y la
+        <a href={`${base}/accesibilidad/`}>declaración de accesibilidad</a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .legal-vigencia {
+    font-size: 0.85rem;
+    color: var(--tinta-tenue);
+    padding-bottom: 1.25rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--linea);
+  }
+
+  .legal-bloque:first-child h2 {
+    margin-top: 0;
+  }
+
+  .legal-lista :global(ul) {
+    margin-top: -0.35rem;
+  }
+
+  .legal-pie {
+    margin-top: 3rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--linea);
+    font-size: 0.85rem;
+    color: var(--tinta-tenue);
+    line-height: 1.7;
+  }
+  .legal-pie a {
+    color: var(--terracota-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

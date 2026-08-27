@@ -1,0 +1,410 @@
+---
+// Bitacora de un proyecto: la linea temporal publica de lo que va ocurriendo.
+//
+// Convencion heredada del repo hermano EstrellasEuropa: cada entrada es un .md
+// de la coleccion `bitacora` con un campo `project` que apunta al slug del
+// proyecto, y cada entrada tiene un ancla propia (#n-<id>) para poder enlazar un
+// avance concreto desde redes o desde un correo. Se descarto meter las entradas
+// dentro de src/data/proyectos.ts: la ficha del proyecto es informacion estable
+// que sale del formulario aprobado, mientras que la bitacora se actualiza cada
+// pocas semanas y tiene que poder editarla alguien sin tocar TypeScript.
+//
+// La coleccion esta vacia a dia de hoy porque ninguna de las dos actividades ha
+// arrancado todavia. El componente contempla ese caso y muestra un aviso sobrio:
+// es el estado normal de la pagina durante los primeros meses, no un error.
+import { getCollection, render } from 'astro:content';
+
+interface Props {
+  project: string;
+}
+
+const { project } = Astro.props;
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Los `links[].url` de una entrada se escriben como ruta absoluta del sitio
+// ('/proyectos/democracia-sin-barreras/') o como URL externa completa. Las
+// internas necesitan el prefijo `base`: con GH_SUBPATH=1 el sitio se sirve bajo
+// /estrelladelrif/ y un href a pelo se iria a la raiz del dominio y daria 404,
+// que es justo lo que pasaba al imprimir el campo tal cual. La barra inicial es
+// lo unico que distingue una ruta interna de una URL absoluta o de un ancla.
+const urlEnlace = (url: string) => (url.startsWith('/') ? `${base}${url}` : url);
+
+// Astro 6 (Content Layer): las entradas se direccionan por `entry.id`, no por
+// `entry.slug`, y el cuerpo se compila con la funcion `render` importada de
+// astro:content, no con el metodo `entry.render()` de Astro 4.
+const entradasCrudas = (
+  await getCollection('bitacora', ({ data }) => data.project === project && !data.draft)
+).sort((a, b) => b.data.date.localeCompare(a.data.date));
+
+const entradas = await Promise.all(
+  entradasCrudas.map(async (entrada) => {
+    const { Content } = await render(entrada);
+    return { entrada, Content };
+  }),
+);
+
+const MESES = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+];
+
+// El esquema de la coleccion ya obliga al formato YYYY-MM-DD, asi que se puede
+// partir la cadena sin construir un Date: hacerlo con `new Date(fecha)` la
+// interpretaria como UTC y en los husos al oeste de Greenwich mostraria el dia
+// anterior.
+const formatearFecha = (fecha: string) => {
+  const [anio, mes, dia] = fecha.split('-');
+  return `${Number(dia)} de ${MESES[Number(mes) - 1]} de ${anio}`;
+};
+
+// El id del fichero puede llevar subcarpetas o mayusculas; se normaliza para que
+// el ancla sea un identificador valido y estable.
+const ancla = (id: string) =>
+  `n-${id.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')}`;
+
+// Cada tipo de entrada tiene su distintivo y el color de su marca en la linea
+// temporal. Se reutilizan las clases .badge-* de global.css en vez de inventar
+// colores nuevos, y el color del punto viaja como variable --kc para que el
+// borde de la tarjeta y el punto no se desincronicen. El tipo se lee siempre
+// como texto: el color no es la unica pista.
+const ESTILO_KIND: Record<string, { badge: string; marca: string }> = {
+  Hito:       { badge: 'badge-terracota', marca: 'var(--terracota)' },
+  Actividad:  { badge: 'badge-turquesa',  marca: 'var(--turquesa)' },
+  Material:   { badge: 'badge-indigo',    marca: 'var(--indigo-alto)' },
+  Centro:     { badge: 'badge-eu',        marca: 'var(--indigo)' },
+  Evaluacion: { badge: 'badge-oro',       marca: 'var(--oro)' },
+  Difusion:   { badge: 'badge-indigo',    marca: 'var(--indigo-medio)' },
+};
+const estiloDe = (kind: string) =>
+  ESTILO_KIND[kind] ?? { badge: 'badge-indigo', marca: 'var(--indigo-alto)' };
+
+// Los valores del esquema van sin tilde (convencion de los repos hermanos para
+// no meter acentos en identificadores), pero el distintivo visible si la lleva.
+const ETIQUETA_KIND: Record<string, string> = {
+  Evaluacion: 'Evaluación',
+  Difusion: 'Difusión',
+};
+
+const ICON = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+const ICONO_RELOJ = `<svg ${ICON} width="24" height="24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l3 2"/></svg>`;
+const ICONO_ENLACE = `<svg ${ICON} width="13" height="13" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg>`;
+---
+
+<section class="section bitacora" id="bitacora" aria-labelledby="bitacora-titulo">
+  <div class="container">
+    <div class="bit-cabecera fade-in">
+      <span class="section-label">Seguimiento</span>
+      <h2 class="section-title" id="bitacora-titulo">Cómo va el proyecto</h2>
+      <p class="section-subtitle">
+        Aquí se publica cada avance: actividades celebradas, materiales
+        publicados, centros y entidades que se suman y resultados de la
+        evaluación.
+      </p>
+    </div>
+
+    {entradas.length === 0 ? (
+      <div class="bit-vacio fade-in">
+        <span class="bit-vacio-icono" set:html={ICONO_RELOJ} />
+        <p>
+          Todavía no hay entradas. El seguimiento se publicará en cuanto arranque
+          la actividad del proyecto.
+        </p>
+      </div>
+    ) : (
+      <ol class="bit-lista">
+        {entradas.map(({ entrada, Content }, i) => {
+          const estilo = estiloDe(entrada.data.kind);
+          const id = ancla(entrada.id);
+          return (
+            <li
+              class:list={['bit-entrada', 'fade-in', `fade-in-delay-${(i % 3) + 1}`]}
+              id={id}
+              style={`--kc: ${estilo.marca}`}
+            >
+              <span class="bit-punto" aria-hidden="true"></span>
+
+              <article class="bit-tarjeta">
+                <div class="bit-meta">
+                  <span class:list={['badge', estilo.badge]}>
+                    {ETIQUETA_KIND[entrada.data.kind] ?? entrada.data.kind}
+                  </span>
+                  <time class="bit-fecha" datetime={entrada.data.date}>
+                    {formatearFecha(entrada.data.date)}
+                  </time>
+                  {entrada.data.phase && <span class="bit-dato">{entrada.data.phase}</span>}
+                  {entrada.data.location && <span class="bit-dato">{entrada.data.location}</span>}
+                </div>
+
+                <h3 class="bit-titulo">
+                  <a href={`#${id}`} aria-label={`Enlace directo a: ${entrada.data.title}`}>
+                    {entrada.data.title}
+                  </a>
+                </h3>
+
+                {entrada.data.description && (
+                  <p class="bit-descripcion">{entrada.data.description}</p>
+                )}
+
+                {entrada.data.metrics && entrada.data.metrics.length > 0 && (
+                  <dl class="bit-metricas">
+                    {entrada.data.metrics.map((metrica) => (
+                      <div class="bit-metrica">
+                        <dt>{metrica.label}</dt>
+                        <dd>{metrica.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+
+                <div class="bit-cuerpo">
+                  <Content />
+                </div>
+
+                {entrada.data.links && entrada.data.links.length > 0 && (
+                  <ul class="bit-enlaces">
+                    {entrada.data.links.map((enlace) => (
+                      <li>
+                        <a class="bit-enlace" href={urlEnlace(enlace.url)} rel="noopener">
+                          {enlace.label}
+                          <span class="bit-enlace-icono" set:html={ICONO_ENLACE} />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </article>
+            </li>
+          );
+        })}
+      </ol>
+    )}
+  </div>
+</section>
+
+<style>
+  .bitacora {
+    background: var(--cal-oscuro);
+    border-top: 1px solid var(--linea);
+  }
+  .bit-cabecera {
+    max-width: 620px;
+    margin-bottom: 2.5rem;
+  }
+
+  .bit-vacio {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    max-width: 640px;
+    padding: 1.5rem 1.75rem;
+    background: #fff;
+    border: 1px dashed var(--linea);
+    border-radius: var(--radius-lg);
+  }
+  .bit-vacio-icono {
+    display: block;
+    color: var(--turquesa-texto);
+    flex-shrink: 0;
+    margin-top: 0.2rem;
+  }
+  .bit-vacio p {
+    color: var(--tinta-suave);
+    font-size: 0.95rem;
+  }
+
+  /* La linea vertical es un pseudoelemento de la lista y no un borde de cada
+     entrada: asi no se corta en los huecos entre tarjetas. */
+  .bit-lista {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    padding-left: 1.75rem;
+  }
+  .bit-lista::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 0.6rem;
+    bottom: 0.6rem;
+    width: 2px;
+    background: var(--linea);
+  }
+
+  .bit-entrada {
+    position: relative;
+    /* La navbar es fija; sin este margen el ancla deja el titulo tapado. */
+    scroll-margin-top: 96px;
+  }
+  .bit-punto {
+    position: absolute;
+    left: -1.75rem;
+    top: 0.55rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--kc);
+    border: 3px solid var(--cal-oscuro);
+    box-shadow: 0 0 0 1px var(--kc);
+  }
+
+  .bit-tarjeta {
+    background: #fff;
+    border: 1px solid var(--linea);
+    border-left: 3px solid var(--kc);
+    border-radius: var(--radius-md);
+    padding: 1.4rem 1.6rem;
+  }
+
+  .bit-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.85rem;
+    margin-bottom: 0.6rem;
+  }
+  .bit-fecha,
+  .bit-dato {
+    font-size: 0.78rem;
+    color: var(--tinta-tenue);
+    font-weight: 500;
+  }
+  .bit-dato::before {
+    content: '· ';
+  }
+
+  .bit-titulo {
+    font-size: 1.2rem;
+    color: var(--indigo);
+    margin-bottom: 0.45rem;
+  }
+  .bit-titulo a {
+    text-decoration: none;
+  }
+  .bit-titulo a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .bit-descripcion {
+    color: var(--tinta-suave);
+    line-height: 1.7;
+    margin-bottom: 0.9rem;
+  }
+
+  /* dt y dd van en column-reverse: en el marcado la etiqueta precede al valor,
+     como manda el <dl>, pero visualmente el numero va primero. */
+  .bit-metricas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+  .bit-metrica {
+    background: var(--cal);
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.9rem;
+    display: flex;
+    flex-direction: column-reverse;
+    line-height: 1.25;
+  }
+  .bit-metrica dd {
+    font-family: 'Playfair Display Variable', 'Playfair Display', 'Playfair Display Fallback', Georgia, serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--indigo);
+  }
+  .bit-metrica dt {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--tinta-tenue);
+  }
+
+  /* El cuerpo llega de Markdown, asi que hay que alcanzar a los hijos con
+     :global. Se le baja el peso a los encabezados: dentro de una entrada de
+     bitacora son subdivisiones de una tarjeta, no titulos de seccion. */
+  .bit-cuerpo :global(p) {
+    color: var(--tinta-suave);
+    line-height: 1.75;
+    margin-bottom: 0.85rem;
+  }
+  .bit-cuerpo :global(p:last-child) {
+    margin-bottom: 0;
+  }
+  .bit-cuerpo :global(ul),
+  .bit-cuerpo :global(ol) {
+    list-style: disc;
+    padding-left: 1.3rem;
+    margin-bottom: 0.85rem;
+  }
+  .bit-cuerpo :global(ol) {
+    list-style: decimal;
+  }
+  .bit-cuerpo :global(li) {
+    color: var(--tinta-suave);
+    line-height: 1.7;
+    margin-bottom: 0.3rem;
+  }
+  .bit-cuerpo :global(h2),
+  .bit-cuerpo :global(h3),
+  .bit-cuerpo :global(h4) {
+    font-family: 'DM Sans Variable', 'DM Sans', 'DM Sans Fallback', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--indigo);
+    margin: 1.2rem 0 0.5rem;
+  }
+  .bit-cuerpo :global(strong) {
+    color: var(--indigo);
+  }
+  .bit-cuerpo :global(a) {
+    color: var(--terracota-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .bit-cuerpo :global(blockquote) {
+    border-left: 3px solid var(--linea);
+    padding-left: 1rem;
+    font-style: italic;
+    color: var(--tinta-tenue);
+    margin-bottom: 0.85rem;
+  }
+
+  .bit-enlaces {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1rem;
+  }
+  .bit-enlace {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--turquesa-texto);
+    text-decoration: none;
+    border: 1px solid rgba(47, 143, 137, 0.35);
+    border-radius: var(--radius-full);
+    padding: 0.3rem 0.85rem;
+    transition: background 0.2s ease;
+  }
+  .bit-enlace:hover {
+    background: var(--turquesa-dim);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .bit-enlace-icono {
+    display: block;
+    flex-shrink: 0;
+  }
+
+  @media (max-width: 640px) {
+    .bit-tarjeta {
+      padding: 1.2rem 1.15rem;
+    }
+  }
+</style>

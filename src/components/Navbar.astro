@@ -1,0 +1,255 @@
+---
+import { site, navLinks } from '../data/site';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Ruta actual normalizada con barra final, para marcar el enlace activo. El
+// `base` se recorta antes de comparar: con GH_SUBPATH activo la ruta llega como
+// /estrelladelrif/proyectos/ y sin el como /proyectos/.
+const ruta = Astro.url.pathname.replace(base, '') || '/';
+const rutaNorm = ruta.endsWith('/') ? ruta : `${ruta}/`;
+
+const esActivo = (href: string) => {
+  if (href === '/') return rutaNorm === '/';
+  return rutaNorm === href || rutaNorm.startsWith(href);
+};
+---
+
+<header class="navbar">
+  <div class="container navbar-inner">
+    {/* Sin aria-label a proposito. El que habia («Estrella del Rif — inicio»)
+        sustituia por completo al contenido visible del enlace, y ese contenido
+        incluye el claim «Melilla · Juventud · Europa», que no aparecia en el
+        nombre accesible: quien dicta por voz no podia pronunciar lo que ve
+        (criterio 2.5.3, etiqueta en el nombre). Ahora el claim va aria-hidden y
+        el nombre accesible del enlace es exactamente «Estrella del Rif». */}
+    <a href={`${base}/`} class="marca">
+      <img
+        src={`${base}/images/logo-claro.svg`}
+        alt=""
+        width="34"
+        height="34"
+        aria-hidden="true"
+      />
+      <span class="marca-texto">
+        <span class="marca-nombre">{site.name}</span>
+        <span class="marca-claim" aria-hidden="true">Melilla · Juventud · Europa</span>
+      </span>
+    </a>
+
+    <button
+      class="hamburguesa"
+      type="button"
+      aria-label="Abrir el menú de navegación"
+      aria-expanded="false"
+      aria-controls="nav-principal"
+    >
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </button>
+
+    <nav id="nav-principal" class="nav" aria-label="Navegación principal">
+      <ul>
+        {navLinks.map((enlace) => (
+          <li>
+            <a
+              href={`${base}${enlace.href}`}
+              class:list={['nav-enlace', { activo: esActivo(enlace.href) }]}
+              aria-current={esActivo(enlace.href) ? 'page' : undefined}
+            >
+              {enlace.label}
+            </a>
+          </li>
+        ))}
+        <li class="nav-cta">
+          <a href={`${base}/participa/`} class="btn btn-oro">Participa</a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    height: 68px;
+    background: rgba(20, 38, 63, 0.92);
+    /* El desenfoque es un extra: si el navegador no lo soporta, el fondo
+       semitransparente de arriba ya garantiza el contraste del texto. */
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  }
+
+  .navbar-inner {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .marca {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    text-decoration: none;
+    flex-shrink: 0;
+  }
+  .marca img {
+    width: 34px;
+    height: 34px;
+  }
+  .marca-texto {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+  }
+  .marca-nombre {
+    font-family: 'Playfair Display Variable', 'Playfair Display', 'Playfair Display Fallback', Georgia, serif;
+    font-weight: 700;
+    font-size: 1.08rem;
+    color: #fff;
+  }
+  .marca-claim {
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--oro);
+  }
+
+  .nav ul {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .nav-enlace {
+    display: block;
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.93rem;
+    color: rgba(255, 255, 255, 0.82);
+    text-decoration: none;
+    transition: color 0.2s ease, background 0.2s ease;
+  }
+  .nav-enlace:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+  }
+  .nav-enlace.activo {
+    color: #fff;
+    box-shadow: inset 0 -2px 0 var(--oro);
+  }
+  .nav-cta {
+    margin-left: 0.6rem;
+  }
+  .nav-cta .btn {
+    padding: 0.5rem 1.1rem;
+    font-size: 0.9rem;
+  }
+
+  .hamburguesa {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    padding: 0.5rem;
+    border-radius: var(--radius-sm);
+  }
+  .hamburguesa span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: #fff;
+    border-radius: 2px;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+  }
+  .hamburguesa[aria-expanded='true'] span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+  .hamburguesa[aria-expanded='true'] span:nth-child(2) {
+    opacity: 0;
+  }
+  .hamburguesa[aria-expanded='true'] span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  @media (max-width: 900px) {
+    .hamburguesa {
+      display: flex;
+      order: 3;
+    }
+    .nav {
+      position: absolute;
+      top: 68px;
+      left: 0;
+      right: 0;
+      background: var(--indigo);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+      /* Se oculta con display:none y no con altura cero para que los enlaces
+         salgan del orden de tabulacion cuando el menu esta cerrado. */
+      display: none;
+    }
+    .nav.abierto {
+      display: block;
+    }
+    .nav ul {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding: 0.5rem 1.5rem 1.25rem;
+    }
+    .nav-enlace {
+      padding: 0.8rem 0.25rem;
+      font-size: 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 0;
+    }
+    .nav-enlace.activo {
+      box-shadow: none;
+      color: var(--oro);
+    }
+    .nav-cta {
+      margin: 1rem 0 0;
+    }
+    .nav-cta .btn {
+      width: 100%;
+      justify-content: center;
+      padding: 0.75rem 1.1rem;
+    }
+    .marca-claim {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const boton = document.querySelector<HTMLButtonElement>('.hamburguesa');
+  const nav = document.querySelector<HTMLElement>('#nav-principal');
+
+  if (boton && nav) {
+    boton.addEventListener('click', () => {
+      const abierto = boton.getAttribute('aria-expanded') === 'true';
+      boton.setAttribute('aria-expanded', String(!abierto));
+      boton.setAttribute(
+        'aria-label',
+        abierto ? 'Abrir el menú de navegación' : 'Cerrar el menú de navegación',
+      );
+      nav.classList.toggle('abierto', !abierto);
+    });
+
+    // Escape cierra el menu y devuelve el foco al boton: sin esto, en movil
+    // quien navega con teclado queda atrapado dentro de la lista abierta.
+    document.addEventListener('keydown', (evento) => {
+      if (evento.key !== 'Escape') return;
+      if (boton.getAttribute('aria-expanded') !== 'true') return;
+      boton.setAttribute('aria-expanded', 'false');
+      boton.setAttribute('aria-label', 'Abrir el menú de navegación');
+      nav.classList.remove('abierto');
+      boton.focus();
+    });
+  }
+</script>

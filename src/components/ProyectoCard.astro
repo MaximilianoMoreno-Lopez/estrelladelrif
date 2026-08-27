@@ -1,0 +1,147 @@
+---
+import type { Proyecto } from '../data/proyectos';
+
+interface Props {
+  proyecto: Proyecto;
+}
+
+const { proyecto } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const href = `${base}/proyectos/${proyecto.slug}/`;
+---
+
+<article class="proyecto-card card">
+  {/* El enlace envuelve toda la tarjeta, asi que sin aria-label su nombre
+      accesible seria la concatenacion de distintivo, estado, titulo, acronimo,
+      resumen y la lista de fechas y ambito: un enlace de varias frases. El
+      aria-label lo deja en una sola y contiene el texto visible del h3 y el de
+      la llamada del pie, de modo que sigue cumpliendo el criterio 2.5.3
+      (etiqueta en el nombre) para quien maneja el navegador por voz. */}
+  <a
+    href={href}
+    class="proyecto-enlace"
+    aria-label={`Ver la ficha del proyecto: ${proyecto.tituloCorto}`}
+  >
+    <div class="proyecto-cabecera">
+      <span class:list={['badge', `badge-${proyecto.badgeColor}`]}>{proyecto.badge}</span>
+      <span class:list={['estado', proyecto.estado]}>
+        {proyecto.estado === 'activo' ? 'En marcha' : 'Finalizado'}
+      </span>
+    </div>
+
+    <h3>{proyecto.tituloCorto}</h3>
+    {proyecto.acronimo && <p class="proyecto-acronimo">{proyecto.acronimo}</p>}
+
+    <p class="proyecto-resumen">{proyecto.resumen}</p>
+
+    <dl class="proyecto-datos">
+      <div>
+        <dt>Fechas</dt>
+        <dd>{proyecto.fechasLabel}</dd>
+      </div>
+      <div>
+        <dt>Ámbito</dt>
+        <dd>{proyecto.ambito}</dd>
+      </div>
+    </dl>
+
+    <span class="proyecto-mas" aria-hidden="true">Ver la ficha del proyecto →</span>
+  </a>
+</article>
+
+<style>
+  .proyecto-card {
+    overflow: hidden;
+  }
+  /* El enlace envuelve toda la tarjeta en vez de haber un enlace pequeno al
+     final: asi el area pulsable es la tarjeta entera, que es lo que la gente
+     intenta pulsar, y sigue habiendo un solo destino por tarjeta (evita el
+     patron de enlaces repetidos que confunde a los lectores de pantalla). */
+  .proyecto-enlace {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    height: 100%;
+    padding: 1.6rem;
+    text-decoration: none;
+  }
+
+  .proyecto-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .estado {
+    font-size: 0.76rem;
+    font-weight: 600;
+    color: var(--tinta-tenue);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .estado::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--tinta-tenue);
+  }
+  .estado.activo {
+    color: var(--turquesa-texto);
+  }
+  .estado.activo::before {
+    background: var(--turquesa);
+  }
+
+  h3 {
+    font-size: 1.35rem;
+    color: var(--indigo);
+    margin-top: 0.2rem;
+  }
+  .proyecto-acronimo {
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--terracota-texto);
+    font-weight: 600;
+    margin-top: -0.45rem;
+  }
+  .proyecto-resumen {
+    color: var(--tinta-suave);
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
+  .proyecto-datos {
+    display: grid;
+    gap: 0.6rem;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--linea);
+  }
+  .proyecto-datos dt {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tinta-tenue);
+  }
+  .proyecto-datos dd {
+    font-size: 0.9rem;
+    color: var(--indigo);
+  }
+
+  .proyecto-mas {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--terracota-texto);
+    margin-top: 0.35rem;
+  }
+  .proyecto-card:hover .proyecto-mas {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

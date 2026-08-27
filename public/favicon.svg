@@ -1,0 +1,13 @@
+<!--
+  Favicon. Misma marca que public/images/logo.svg, recalculada para tamano
+  pequeno sobre cuadrado redondeado indigo: el arco crece a radio 16.4 con trazo
+  5.2 y la estrella a radio 10.6, porque a 16 px el trazado del logo grande se
+  cierra y se convierte en una mancha. El zocalo de terracota desaparece por el
+  mismo motivo: a 16 px seria una linea de menos de medio pixel.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="13" fill="#14263f"/>
+  <path d="M18.6 52 L18.6 41.4 A16.4 16.4 0 1 1 45.4 41.4 L45.4 52"
+        fill="none" stroke="#f8f5ef" stroke-width="5.2" stroke-linecap="round"/>
+  <polygon fill="#e0a428" points="32,20.4 35.1,23.5 39.5,23.5 39.5,27.9 42.6,31 39.5,34.1 39.5,38.5 35.1,38.5 32,41.6 28.9,38.5 24.5,38.5 24.5,34.1 21.4,31 24.5,27.9 24.5,23.5 28.9,23.5"/>
+</svg>

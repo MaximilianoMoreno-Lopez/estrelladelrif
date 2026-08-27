@@ -1,0 +1,217 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { colorTipo, etiquetaTipo } from '../lib/noticias';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Orden del listado: primero el campo `order` ascendente (permite fijar arriba
+// una noticia con order negativo o 0 aunque no sea la mas reciente) y, a
+// igualdad de order, la fecha descendente. Es el mismo criterio de los repos
+// hermanos, con una diferencia: alli solo se ordenaba por `order`, asi que dos
+// noticias con el orden por defecto quedaban en el orden alfabetico del sistema
+// de ficheros. Aqui el desempate por fecha lo hace previsible.
+const noticias = (await getCollection('noticias')).sort((a, b) => {
+  const porOrden = (a.data.order ?? 99) - (b.data.order ?? 99);
+  if (porOrden !== 0) return porOrden;
+  return b.data.date.localeCompare(a.data.date);
+});
+
+const MESES = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+];
+
+// El esquema admite "YYYY-MM" y "YYYY-MM-DD": muchas noticias solo tienen mes
+// de referencia y fingir un dia concreto seria inventar un dato.
+function fechaLarga(fecha: string): string {
+  const [anio, mes, dia] = fecha.split('-');
+  if (!mes) return anio;
+  const nombreMes = MESES[Number(mes) - 1] ?? '';
+  if (!dia) return `${nombreMes} de ${anio}`;
+  return `${Number(dia)} de ${nombreMes} de ${anio}`;
+}
+
+const ICON = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+const iconoRss = `<svg ${ICON} width="16" height="16" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1.5" fill="currentColor" stroke="none"/></svg>`;
+---
+
+<BaseLayout
+  title="Actualidad"
+  description="Noticias de Estrella del Rif: proyectos Erasmus+, DiscoverEU, actividades en Melilla y vida de la asociación."
+  breadcrumbs={[
+    { name: 'Inicio', url: '/' },
+    { name: 'Actualidad', url: '/actualidad/' },
+  ]}
+>
+  <div class="page-hero">
+    <div class="container page-hero-content">
+      <span class="badge badge-white fade-in">Estrella del Rif</span>
+      <h1 class="fade-in fade-in-delay-1">Actualidad</h1>
+      <p class="fade-in fade-in-delay-2">
+        Novedades de la asociación y de los proyectos europeos que ponemos en marcha
+        desde Melilla.
+      </p>
+    </div>
+  </div>
+
+  <section class="section" aria-label="Listado de noticias">
+    <div class="container">
+      {noticias.length > 0 ? (
+        <div class="noticias-grid">
+          {noticias.map((noticia, i) => (
+            <article class:list={['noticia-card', 'card', 'fade-in', `fade-in-delay-${(i % 3) + 1}`]}>
+              {/* Un solo enlace por tarjeta y sobre toda su superficie: es lo que
+                  la gente intenta pulsar y evita repetir destinos identicos en la
+                  lista de enlaces de un lector de pantalla. El aria-label acorta
+                  el nombre accesible, que si no seria el distintivo, la fecha, el
+                  lugar, el titular y el resumen leidos de corrido; incluye el
+                  texto visible de la llamada y el del titular para cumplir el
+                  criterio 2.5.3 de etiqueta en el nombre. */}
+              <a
+                href={`${base}/actualidad/${noticia.id}/`}
+                class="noticia-enlace"
+                aria-label={`Leer la noticia: ${noticia.data.title}`}
+              >
+                <span class:list={['badge', `badge-${colorTipo(noticia.data.type)}`]}>
+                  {etiquetaTipo(noticia.data.type)}
+                </span>
+
+                <p class="noticia-meta">
+                  <time datetime={noticia.data.date}>{fechaLarga(noticia.data.date)}</time>
+                  {noticia.data.location && <span class="noticia-lugar">{noticia.data.location}</span>}
+                </p>
+
+                <h2 class="noticia-titulo">{noticia.data.title}</h2>
+
+                {noticia.data.description && (
+                  <p class="noticia-desc">{noticia.data.description}</p>
+                )}
+
+                <span class="noticia-mas" aria-hidden="true">Leer la noticia →</span>
+              </a>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div class="vacio card-plana fade-in">
+          <h2>Todavía no hay noticias publicadas</h2>
+          <p>
+            La asociación se constituyó en 2024 y sus dos primeros proyectos europeos
+            arrancan en 2026. En cuanto haya novedades que contar, aparecerán aquí.
+          </p>
+          <a href={`${base}/proyectos/`} class="btn btn-outline">Ver los proyectos</a>
+        </div>
+      )}
+
+      <p class="rss fade-in">
+        <a href={`${base}/rss.xml`} class="rss-enlace">
+          <span class="rss-icono" set:html={iconoRss}></span>
+          Suscribirse por RSS
+        </a>
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .noticias-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .noticia-card {
+    overflow: hidden;
+  }
+  .noticia-enlace {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    height: 100%;
+    padding: 1.6rem;
+    text-decoration: none;
+  }
+  /* Sin align-items: flex-start en el contenedor, para que el parrafo de
+     descripcion ocupe todo el ancho de la tarjeta; el distintivo se encoge por
+     si mismo, que si no se estiraria de lado a lado. */
+  .noticia-enlace > .badge {
+    align-self: flex-start;
+  }
+
+  .noticia-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--tinta-tenue);
+  }
+  /* Separador tipografico entre fecha y lugar. Va en ::before del lugar para no
+     dejar un punto suelto cuando la noticia no tiene lugar. */
+  .noticia-lugar::before {
+    content: '· ';
+  }
+
+  .noticia-titulo {
+    font-size: 1.2rem;
+    line-height: 1.3;
+    color: var(--indigo);
+  }
+  .noticia-desc {
+    font-size: 0.93rem;
+    line-height: 1.65;
+    color: var(--tinta-suave);
+    /* flex:1 empuja el "Leer la noticia" al pie de la tarjeta, de modo que en
+       una fila de tarjetas de texto desigual la llamada queda alineada. */
+    flex: 1;
+  }
+  .noticia-mas {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--terracota-texto);
+    margin-top: 0.35rem;
+  }
+  .noticia-card:hover .noticia-mas {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .vacio {
+    padding: 3rem 2rem;
+    text-align: center;
+    max-width: 620px;
+    margin: 0 auto;
+  }
+  .vacio h2 {
+    font-size: 1.35rem;
+    color: var(--indigo);
+    margin-bottom: 0.75rem;
+  }
+  .vacio p {
+    color: var(--tinta-suave);
+    font-size: 0.98rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .rss {
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--linea);
+  }
+  .rss-enlace {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--terracota-texto);
+    text-decoration: none;
+  }
+  .rss-enlace:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .rss-icono {
+    display: inline-flex;
+  }
+</style>

@@ -1,0 +1,10 @@
+---
+// KA155-YOU «Melilla is Europe». Igual que la otra ficha: la pagina solo elige
+// el objeto y la plantilla compartida se encarga del resto. Este proyecto lo
+// ejecuta la asociacion en solitario, y ProyectoFicha lo dice explicitamente al
+// detectar que hay una sola entidad en `socios`.
+import ProyectoFicha from '../../components/ProyectoFicha.astro';
+import { melillaIsEurope } from '../../data/proyectos';
+---
+
+<ProyectoFicha proyecto={melillaIsEurope} />

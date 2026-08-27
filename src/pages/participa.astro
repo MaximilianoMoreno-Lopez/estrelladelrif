@@ -1,0 +1,591 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
+import { democraciaSinBarreras, melillaIsEurope } from '../data/proyectos';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Iconos SVG inline. Los atributos comunes se declaran una sola vez y cada
+// icono aporta solo sus trazados; el conjunto se inyecta con set:html sobre un
+// <span> decorativo. Sin libreria de iconos: son cuatro dibujos, no justifican
+// una dependencia.
+const ICON =
+  'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+
+// Que ofrecemos. Todo lo que figura aqui esta comprometido en las dos
+// solicitudes aprobadas: Youthpass, apoyo individual y pases de viaje, apoyo a
+// la inclusion y una persona de apoyo por grupo de viaje. No se anade ningun
+// beneficio que no este presupuestado.
+const ofrecemos = [
+  {
+    icon: `<svg ${ICON}><circle cx="12" cy="9" r="6"/><path d="M8.2 13.9 7 22l5-3 5 3-1.2-8.1"/></svg>`,
+    titulo: 'Youthpass',
+    texto:
+      'Certificado europeo de las competencias adquiridas. Las dos actividades incluyen ' +
+      'sesiones de reflexión y reconocimiento del aprendizaje que lo respaldan.',
+  },
+  {
+    icon: `<svg ${ICON}><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/></svg>`,
+    titulo: 'Formación en educación no formal',
+    texto:
+      'Métodos participativos y vivenciales: talleres, debates guiados, juegos de rol, ' +
+      'comunicación accesible y trabajo en grupo. No hace falta experiencia previa.',
+  },
+  {
+    icon: `<svg ${ICON}><path d="M3 11l19-7-7 19-2.5-7.5L3 11z"/></svg>`,
+    // Antes decia "Participar no te supone un coste", que es una garantia
+    // absoluta que las solicitudes no dan: los presupuestos aprobados son
+    // cantidades a tanto alzado y el propio KA154 preve que, si el apoyo
+    // concedido no cubre el 100 % de los costes necesarios, el consorcio
+    // cofinancie la diferencia con recursos propios.
+    titulo: 'Viaje y estancia financiados',
+    texto:
+      'En las movilidades Erasmus+ el programa financia el viaje y la manutención según ' +
+      'los importes aprobados en cada actividad.',
+  },
+  {
+    icon: `<svg ${ICON}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+    titulo: 'Acompañamiento',
+    texto:
+      'Sesiones preparatorias antes de cada actividad, una persona de apoyo con perfil ' +
+      'de trabajo con juventud en cada grupo de viaje y apoyo a la inclusión para quien ' +
+      'necesite adaptaciones.',
+  },
+];
+
+const pedimos = [
+  'Tener entre 18 y 30 años en «Democracia sin barreras», y entre 18 y 21 en «Melilla is Europe».',
+  'Compromiso con el calendario completo de la actividad, incluidas las sesiones previas y las de evaluación.',
+  'Disposición a trabajar en grupos diversos y en entornos multiculturales, con respeto por la diversidad.',
+  'Voluntad de devolver algo a la ciudad: las dos actividades terminan en propuestas, materiales o acciones locales.',
+  'Contarnos qué necesitas para participar en igualdad de condiciones. Adaptar es nuestro trabajo, no tu obstáculo.',
+];
+
+// Pasos de inscripcion. Al no haber formulario no hay campos obligatorios: el
+// paso 2 enumera lo que conviene contar para que la primera respuesta ya sea
+// util y no haga falta un ida y vuelta de correos.
+const pasos = [
+  {
+    titulo: 'Escribe al correo de la asociación',
+    texto: `A ${site.email}, con un asunto claro: «Voluntariado», «Alta como socia o socio» o el nombre del proyecto que te interesa.`,
+  },
+  {
+    titulo: 'Cuéntanos lo básico',
+    texto:
+      'Tu nombre, tu edad, dónde vives, qué te interesa y qué apoyos o adaptaciones ' +
+      'necesitas. Con eso podemos decirte si encajas en una convocatoria abierta.',
+  },
+  {
+    titulo: 'Te respondemos',
+    texto:
+      'Te confirmamos si hay plazas, te enviamos el calendario y las condiciones y te ' +
+      'resolvemos las dudas. Si no hay convocatoria abierta, te avisamos cuando la haya.',
+  },
+  {
+    titulo: 'Conversación breve',
+    texto:
+      'Por teléfono o en persona en Melilla, para conocernos y comprobar que la ' +
+      'actividad se ajusta a lo que buscas.',
+  },
+  {
+    titulo: 'Confirmación y preparación',
+    texto:
+      'Si hay plaza, la confirmamos por escrito y entras en las sesiones preparatorias ' +
+      'del grupo.',
+  },
+];
+
+const asunto = encodeURIComponent('Quiero participar en Estrella del Rif');
+const mailto = `mailto:${site.email}?subject=${asunto}`;
+---
+
+<BaseLayout
+  title="Participa"
+  description="Cómo participar en Estrella del Rif: convocatorias de los proyectos Erasmus+, voluntariado en la asociación, alta como socia o socio y pasos para inscribirse."
+  breadcrumbs={[
+    { name: 'Inicio', url: '/' },
+    { name: 'Participa', url: '/participa/' },
+  ]}
+>
+  <section class="page-hero">
+    <div class="container page-hero-content">
+      <h1 class="fade-in">Participa</h1>
+      <p class="fade-in fade-in-delay-1">
+        Hay tres formas de entrar: como participante de un proyecto, como voluntaria o
+        voluntario de la asociación, o como socia o socio. Todas empiezan con un correo.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="convocatorias">
+    <div class="container">
+      <div class="bloque-cabecera fade-in">
+        <p class="section-label">Convocatorias</p>
+        <h2 class="section-title" id="convocatorias">Las plazas se abren por proyecto</h2>
+        <p class="section-subtitle">
+          Los dos proyectos aprobados en la convocatoria 2026 de Erasmus+ Juventud tienen
+          un número cerrado de plazas y un perfil de participante definido en la solicitud.
+          Cada selección se anunciará antes de abrirse.
+        </p>
+      </div>
+
+      <div class="grid-2 convocatorias">
+        <article class="card-plana convocatoria fade-in">
+          <span class:list={['badge', `badge-${democraciaSinBarreras.badgeColor}`]}>
+            {democraciaSinBarreras.badge}
+          </span>
+          <h3>{democraciaSinBarreras.tituloCorto}</h3>
+          <p class="convocatoria-plazas">30 plazas · de 18 a 30 años</p>
+          {/* Sin ciudad: el formulario de solicitud da tres versiones distintas de
+              donde se celebra cada encuentro presencial y src/data/proyectos.ts
+              retiro el dato hasta que la asociacion lo confirme. Aqui se dice lo
+              unico que consta en las tres, que son dos y que son en Espana. */}
+          <p class="convocatoria-texto">
+            Quince jóvenes con discapacidad y quince sin discapacidad participan en todas
+            las actividades: dos encuentros presenciales en España, con las ciudades por
+            confirmar, una escuela ciudadana en línea y talleres locales.
+            {' '}{democraciaSinBarreras.fechasLabel}.
+          </p>
+          {/* El texto del enlace nombra el proyecto: las dos tarjetas de esta
+              seccion tenian el mismo "Ver la ficha del proyecto" y, fuera de
+              contexto, en la lista de enlaces de un lector de pantalla eran
+              indistinguibles a pesar de llevar a destinos distintos. */}
+          <a
+            class="convocatoria-enlace"
+            href={`${base}/proyectos/${democraciaSinBarreras.slug}/`}
+          >
+            Ver la ficha de {democraciaSinBarreras.tituloCorto}
+          </a>
+        </article>
+
+        <article class="card-plana convocatoria fade-in fade-in-delay-1">
+          <span class:list={['badge', `badge-${melillaIsEurope.badgeColor}`]}>
+            {melillaIsEurope.badge}
+          </span>
+          <h3>{melillaIsEurope.tituloCorto}</h3>
+          <p class="convocatoria-plazas">15 plazas · de 18 a 21 años · Melilla</p>
+          <p class="convocatoria-texto">
+            Tres grupos de viaje DiscoverEU de cinco personas, cada uno con una persona de
+            apoyo, y un itinerario de seguimiento de seis meses en la ciudad. Dirigido a
+            jóvenes con menos oportunidades. {melillaIsEurope.fechasLabel}.
+          </p>
+          <a class="convocatoria-enlace" href={`${base}/proyectos/${melillaIsEurope.slug}/`}>
+            Ver la ficha de {melillaIsEurope.tituloCorto}
+          </a>
+        </article>
+      </div>
+
+      <div class="aviso fade-in">
+        <h3>Cómo enterarte de la próxima apertura</h3>
+        <ul>
+          <li>
+            Escribe a <a href={mailto}>{site.email}</a> y te avisamos por correo cuando se
+            abra la selección que te interesa.
+          </li>
+          <li>
+            Consulta <a href={`${base}/actualidad/`}>Actualidad</a>, donde se publicarán
+            las convocatorias, los plazos y los criterios. Hay
+            <a href={`${base}/rss.xml`}>canal RSS</a> si prefieres seguirlo desde un lector.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-cal" aria-labelledby="asociacion">
+    <div class="container">
+      <div class="bloque-cabecera fade-in">
+        <p class="section-label">En la asociación</p>
+        <h2 class="section-title" id="asociacion">
+          Voluntariado y alta como socia o socio
+        </h2>
+      </div>
+
+      <div class="grid-2 vias">
+        <div class="card-plana via fade-in">
+          <h3>Voluntariado</h3>
+          <div class="prosa">
+            <p>
+              Estrella del Rif está formada íntegramente por voluntariado: cinco personas
+              que coordinan las actividades, facilitan las sesiones de aprendizaje y
+              gestionan las alianzas y la ejecución de los proyectos. No hay personal
+              contratado, así que cada persona que se suma amplía lo que la asociación
+              puede hacer.
+            </p>
+            <p>Se puede colaborar en:</p>
+            <ul>
+              <li>
+                Preparación y facilitación de talleres y sesiones de educación no formal.
+              </li>
+              <li>
+                Accesibilidad de materiales y espacios: revisión, adaptación y lectura
+                fácil.
+              </li>
+              <li>Comunicación y difusión de las actividades en la ciudad.</li>
+              <li>Logística de encuentros, viajes y actividades locales.</li>
+              <li>
+                Contacto con centros educativos, entidades juveniles y asociaciones de
+                personas con discapacidad.
+              </li>
+            </ul>
+            <p>
+              No pedimos un número fijo de horas. Sí pedimos que el compromiso que aceptes
+              lo puedas sostener: en las actividades con jóvenes, una ausencia improvisada
+              la paga el grupo.
+            </p>
+          </div>
+        </div>
+
+        <div class="card-plana via fade-in fade-in-delay-1">
+          <h3>Asociarse</h3>
+          <div class="prosa">
+            <p>
+              Cualquier persona que comparta los fines de la asociación puede solicitar el
+              alta escribiendo al buzón. La junta directiva resuelve la solicitud conforme
+              a los estatutos y contesta por escrito.
+            </p>
+            {/* Se cae el "regimen de cuotas" (ninguna fuente dice que la
+                asociacion tenga cuotas de socio) y la promesa de enviar los
+                estatutos: figuran como "Proximamente" en /transparencia/ y no se
+                puede comprometer un envio de algo que no consta facilitado. Lo que
+                si se puede garantizar es que la junta explica las condiciones al
+                contestar la solicitud de alta. */}
+            <p>
+              Las condiciones de admisión y los derechos de las personas asociadas están
+              en los estatutos, que todavía no se han publicado en la web. Al responder a
+              la solicitud de alta se explican las condiciones que se aplican, y en el
+              buzón de la asociación se puede preguntar por el estado de los estatutos.
+            </p>
+            <p>
+              Ser socia o socio no obliga a participar en las actividades, y participar en
+              una actividad no obliga a asociarse. Son dos cosas distintas.
+            </p>
+            <p>
+              En <a href={`${base}/transparencia/`}>Transparencia</a> están los datos
+              registrales, la composición de la junta y la financiación pública recibida.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="condiciones">
+    <div class="container">
+      <div class="bloque-cabecera fade-in">
+        <p class="section-label">Condiciones</p>
+        <h2 class="section-title" id="condiciones">Qué pedimos y qué ofrecemos</h2>
+        <p class="section-subtitle">
+          La asociación se sostiene con voluntariado, pero las actividades Erasmus+ están
+          financiadas: el programa financia el viaje y la manutención según los importes
+          aprobados en cada actividad.
+        </p>
+      </div>
+
+      <div class="condiciones">
+        <div class="card-plana pedimos fade-in">
+          <h3>Qué pedimos</h3>
+          <ul class="lista-marcada">
+            {pedimos.map((p) => <li>{p}</li>)}
+          </ul>
+        </div>
+
+        <div class="ofrecemos">
+          <h3 class="ofrecemos-titulo fade-in">Qué ofrecemos</h3>
+          <div class="grid-2 ofrecemos-grid">
+            {ofrecemos.map((o, i) => (
+              <div
+                class:list={[
+                  'card-plana',
+                  'oferta',
+                  'fade-in',
+                  `fade-in-delay-${(i % 4) + 1}`,
+                ]}
+              >
+                <span class="oferta-icono" aria-hidden="true" set:html={o.icon} />
+                <h4>{o.titulo}</h4>
+                <p>{o.texto}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {/*
+    Inscripcion por correo, sin formulario web.
+
+    El sitio es estatico (Astro sin adaptador de servidor) y se publica como
+    ficheros: no hay backend ni funcion serverless que pueda recibir un POST.
+    Un formulario en esta pagina solo podria hacer tres cosas, y las tres son
+    peores que un enlace mailto:
+
+      1. No enviar nada. La persona escribe, pulsa y su mensaje se pierde en
+         silencio. Es la peor experiencia posible y ademas quema la confianza
+         de alguien que queria participar.
+      2. Delegar en un servicio de terceros (Formspree, Google Forms y
+         similares). Eso mete un tercero y sus cookies en un sitio que
+         precisamente no tiene aviso de cookies porque no carga ninguna, y
+         anade un encargado del tratamiento que habria que declarar en
+         /privacidad/.
+      3. Usar method="get" contra un mailto, que es exactamente lo que ya hace
+         el boton de abajo, pero disfrazado de formulario y perdiendo por el
+         camino los saltos de linea y los acentos en algunos clientes.
+
+    Asi que la llamada a la accion es el correo, y estos pasos sustituyen a los
+    campos del formulario: dicen que contar para que la primera respuesta ya
+    sirva.
+  */}
+  <section class="section section-cal" aria-labelledby="pasos">
+    <div class="container-estrecho">
+      <div class="bloque-cabecera fade-in">
+        <p class="section-label">Inscripción</p>
+        <h2 class="section-title" id="pasos">Cinco pasos, empezando por un correo</h2>
+        <p class="section-subtitle">
+          No hay formulario en esta web. Preferimos un correo que llega y se responde a un
+          formulario del que no sabes si ha enviado algo.
+        </p>
+      </div>
+
+      <ol class="pasos fade-in">
+        {pasos.map((paso, i) => (
+          <li>
+            <span class="paso-numero" aria-hidden="true">{i + 1}</span>
+            <div>
+              <h3>{paso.titulo}</h3>
+              <p>{paso.texto}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      <div class="cierre fade-in">
+        <a class="btn btn-primary btn-lg" href={mailto}>Escribir a la asociación</a>
+        <p class="cierre-nota">
+          También puedes llamar al <a href={`tel:${site.phoneHref}`}>{site.phone}</a>. Si
+          el correo no te resulta accesible, dilo por teléfono y buscamos otra vía.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .bloque-cabecera {
+    margin-bottom: 2.5rem;
+  }
+
+  /* ─── Convocatorias ─── */
+  .convocatorias {
+    margin-bottom: 2.5rem;
+  }
+  .convocatoria {
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .convocatoria .badge {
+    align-self: flex-start;
+  }
+  .convocatoria h3 {
+    font-size: 1.3rem;
+    color: var(--indigo);
+  }
+  .convocatoria-plazas {
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--terracota-texto);
+    margin-top: -0.4rem;
+  }
+  .convocatoria-texto {
+    color: var(--tinta-suave);
+    font-size: 0.95rem;
+  }
+  .convocatoria-enlace {
+    margin-top: auto;
+    padding-top: 0.6rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--turquesa-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .aviso {
+    background: var(--white);
+    border: 1px solid var(--linea);
+    border-left: 3px solid var(--oro);
+    border-radius: var(--radius-md);
+    padding: 1.5rem 1.75rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .aviso h3 {
+    font-size: 1.1rem;
+    color: var(--indigo);
+    margin-bottom: 0.75rem;
+  }
+  .aviso ul {
+    display: grid;
+    gap: 0.6rem;
+  }
+  .aviso li {
+    position: relative;
+    padding-left: 1.35rem;
+    color: var(--tinta-suave);
+    font-size: 0.95rem;
+  }
+  .aviso li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 0.45rem;
+    height: 0.45rem;
+    background: var(--oro);
+    border-radius: 50%;
+  }
+  .aviso a {
+    color: var(--terracota-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* ─── Vias de entrada ─── */
+  .via {
+    padding: 1.75rem;
+  }
+  .via h3 {
+    font-size: 1.3rem;
+    color: var(--indigo);
+    margin-bottom: 0.9rem;
+  }
+
+  /* ─── Condiciones ─── */
+  .condiciones {
+    display: grid;
+    gap: 2rem;
+  }
+  .pedimos {
+    padding: 1.75rem;
+  }
+  .pedimos h3,
+  .ofrecemos-titulo {
+    font-size: 1.3rem;
+    color: var(--indigo);
+    margin-bottom: 1rem;
+  }
+  .lista-marcada {
+    display: grid;
+    gap: 0.7rem;
+  }
+  .lista-marcada li {
+    position: relative;
+    padding-left: 1.6rem;
+    color: var(--tinta-suave);
+    font-size: 0.95rem;
+  }
+  /* La marca de verificacion es un pseudoelemento con dos bordes girados, no un
+     caracter tipografico ni un emoji: escala con el texto y los lectores de
+     pantalla no la anuncian. */
+  .lista-marcada li::before {
+    content: '';
+    position: absolute;
+    left: 0.15rem;
+    top: 0.45em;
+    width: 0.5rem;
+    height: 0.28rem;
+    border-left: 2px solid var(--turquesa-texto);
+    border-bottom: 2px solid var(--turquesa-texto);
+    transform: rotate(-45deg);
+  }
+
+  .oferta {
+    padding: 1.4rem;
+  }
+  .oferta-icono {
+    display: inline-flex;
+    color: var(--turquesa-texto);
+    margin-bottom: 0.6rem;
+  }
+  .oferta-icono :global(svg) {
+    width: 26px;
+    height: 26px;
+  }
+  .oferta h4 {
+    font-size: 1.05rem;
+    color: var(--indigo);
+    margin-bottom: 0.35rem;
+  }
+  .oferta p {
+    font-size: 0.92rem;
+    color: var(--tinta-suave);
+    line-height: 1.6;
+  }
+
+  /* ─── Pasos ─── */
+  .pasos {
+    display: grid;
+    gap: 1.1rem;
+  }
+  .pasos li {
+    display: flex;
+    gap: 1.1rem;
+    align-items: flex-start;
+    background: var(--white);
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-md);
+    padding: 1.2rem 1.4rem;
+  }
+  /* El numero se pinta a mano y no con un contador CSS porque el orden ya lo
+     lleva el <ol> semantico; asi el circulo dorado es solo decoracion y no
+     duplica la numeracion que anuncia el lector de pantalla. */
+  .paso-numero {
+    flex-shrink: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    background: var(--indigo);
+    color: var(--oro);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .pasos h3 {
+    font-size: 1.05rem;
+    color: var(--indigo);
+    margin-bottom: 0.2rem;
+  }
+  .pasos p {
+    font-size: 0.94rem;
+    color: var(--tinta-suave);
+    line-height: 1.6;
+  }
+
+  .cierre {
+    margin-top: 2rem;
+    text-align: center;
+  }
+  .cierre-nota {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: var(--tinta-suave);
+  }
+  .cierre-nota a {
+    color: var(--terracota-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (min-width: 900px) {
+    .condiciones {
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+      gap: 2.5rem;
+      align-items: start;
+    }
+  }
+</style>

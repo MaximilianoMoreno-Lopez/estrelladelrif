@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.astro/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Borradores de solicitudes y expedientes: llevan datos personales de
+# participantes y este repositorio es publico. Se quedan solo en local.
+borradores/
+scripts/modelos/
+
+# Hojas de calculo de trabajo interno (planificacion, seguimiento).
+*.xlsx

@@ -1,0 +1,218 @@
+---
+// Hero de la portada.
+//
+// Se pinta entero en el primer frame: no hay canvas, ni particulas, ni ningun
+// script. El unico movimiento son las clases .fade-in, que dentro de .hero el
+// global.css convierte en una animacion CSS con retardo (no en el
+// IntersectionObserver del layout), asi que el LCP no depende del JavaScript.
+//
+// El elemento grafico es la propia marca en grande y con poca opacidad, en vez
+// de una fotografia de archivo: la asociacion todavia no tiene fotos propias de
+// sus actividades (los dos proyectos arrancan en el verano de 2026) y usar un
+// banco de imagenes generico contradiria el tono del resto del sitio.
+import { site } from '../data/site';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Franja de identidad. Los valores salen de site.ts salvo los rotulos y la sede,
+// que son texto visible y por eso van acentuados aqui.
+const identidad = [
+  { etiqueta: 'Sede', valor: 'Melilla, España' },
+  { etiqueta: 'Constituida en', valor: String(site.founded) },
+  { etiqueta: 'OID Erasmus+', valor: site.oid },
+];
+---
+
+<section class="hero">
+  <img
+    class="hero-marca"
+    src={`${base}/images/logo-claro.svg`}
+    alt=""
+    aria-hidden="true"
+    width="640"
+    height="640"
+    fetchpriority="low"
+  />
+
+  <div class="container hero-inner">
+    <p class="hero-pildora badge badge-white fade-in">
+      <span class="hero-punto" aria-hidden="true"></span>
+      Dos proyectos Erasmus+ aprobados en la convocatoria 2026, ronda 1
+    </p>
+
+    <h1 class="fade-in fade-in-delay-1">
+      {site.name}
+      {/* El claim sale de site.ts en vez de repetirse aqui en literal: era una
+          de las cadenas que el fichero declaraba como fuente unica de verdad y
+          nadie consumia, con el riesgo de que las dos versiones se separaran. */}
+      <span class="hero-claim">{site.claim}</span>
+    </h1>
+
+    <p class="hero-entrada fade-in fade-in-delay-2">
+      Somos una asociación juvenil sin ánimo de lucro con sede en Melilla.
+      Trabajamos con educación no formal para que las personas jóvenes de la ciudad
+      participen en la vida democrática y accedan a las oportunidades que ofrece
+      Europa.
+    </p>
+
+    <div class="hero-acciones fade-in fade-in-delay-3">
+      <a href={`${base}/proyectos/`} class="btn btn-oro btn-lg">Nuestros proyectos</a>
+      <a href={`${base}/participa/`} class="btn btn-outline-white btn-lg">Cómo participar</a>
+    </div>
+  </div>
+
+  <div class="hero-franja fade-in fade-in-delay-4">
+    <div class="container">
+      <dl class="hero-identidad">
+        {identidad.map((dato) => (
+          <div>
+            <dt>{dato.etiqueta}</dt>
+            <dd>{dato.valor}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    /* Mismo gradiente que .page-hero pero mas largo y con mas recorrido, para
+       que la portada tenga mas presencia que las paginas interiores. */
+    background: linear-gradient(150deg, var(--indigo) 0%, var(--indigo-alto) 55%, #24406a 100%);
+    padding: 11rem 0 0;
+  }
+  /* Halo de oro. Va en un pseudoelemento y no en el gradiente del fondo para
+     poder centrarlo donde esta la marca sin condicionar el degradado base. */
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 62% 58% at 74% 42%, rgba(224, 164, 40, 0.16) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-marca {
+    position: absolute;
+    right: -7rem;
+    top: 42%;
+    transform: translateY(-50%);
+    width: 640px;
+    height: 640px;
+    /* El reset global pone max-width: 100% a toda imagen. Aqui hay que anularlo:
+       la marca es un elemento decorativo mas ancho que el viewport a proposito y
+       sin esto en movil se encogeria de ancho manteniendo el alto declarado, es
+       decir se deformaria. */
+    max-width: none;
+    opacity: 0.07;
+    pointer-events: none;
+  }
+
+  .hero-inner,
+  .hero-franja {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-pildora {
+    /* .badge lleva white-space: nowrap, que en movil desbordaria esta pildora
+       porque el texto es una frase entera y no una etiqueta corta. */
+    white-space: normal;
+    max-width: 34rem;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.45rem 1rem;
+    line-height: 1.45;
+    text-align: left;
+  }
+  .hero-punto {
+    flex-shrink: 0;
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-top: 0.42em;
+    border-radius: 50%;
+    background: var(--oro);
+  }
+
+  .hero h1 {
+    color: #fff;
+    font-size: clamp(2.4rem, 5.4vw, 4rem);
+    margin: 1.35rem 0 0;
+  }
+  .hero-claim {
+    display: block;
+    margin-top: 0.6rem;
+    font-family: 'DM Sans Variable', 'DM Sans', 'DM Sans Fallback', sans-serif;
+    font-weight: 500;
+    font-size: clamp(1.05rem, 2vw, 1.5rem);
+    line-height: 1.35;
+    color: var(--oro);
+  }
+
+  .hero-entrada {
+    margin-top: 1.5rem;
+    max-width: 40rem;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .hero-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    margin-top: 2.25rem;
+  }
+
+  .hero-franja {
+    margin-top: 4.5rem;
+    padding: 1.6rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(0, 0, 0, 0.14);
+  }
+  .hero-identidad {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem 3.5rem;
+  }
+  .hero-identidad dt {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--oro);
+    margin-bottom: 0.15rem;
+  }
+  .hero-identidad dd {
+    font-size: 0.98rem;
+    color: rgba(255, 255, 255, 0.88);
+  }
+
+  @media (max-width: 900px) {
+    .hero {
+      padding-top: 8.5rem;
+    }
+    .hero-marca {
+      width: 400px;
+      height: 400px;
+      right: -8rem;
+      top: 34%;
+      opacity: 0.06;
+    }
+    .hero-franja {
+      margin-top: 3rem;
+    }
+    .hero-identidad {
+      gap: 1rem 2.25rem;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .hero-acciones .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

@@ -1,0 +1,722 @@
+---
+// Ficha completa de un proyecto.
+//
+// Las dos fichas (KA154 y KA155) tienen exactamente la misma estructura porque
+// las dos se alimentan del mismo tipo `Proyecto`, asi que la plantilla vive aqui
+// y cada pagina de /proyectos/ se limita a pasar su objeto. La alternativa era
+// una ruta dinamica [slug].astro con getStaticPaths: se descarto porque solo hay
+// dos proyectos y con ficheros nombrados se ve de un vistazo que existen esas dos
+// URLs y no se depende de que el slug del dato coincida con la ruta.
+//
+// El componente envuelve el BaseLayout entero (y no solo el cuerpo) para que el
+// JSON-LD del proyecto, la descripcion meta y las migas se construyan una sola
+// vez a partir del objeto en vez de repetirse en las dos paginas.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Bitacora from './Bitacora.astro';
+import EUBanner from './EUBanner.astro';
+import { site } from '../data/site';
+import type { Proyecto } from '../data/proyectos';
+
+interface Props {
+  proyecto: Proyecto;
+}
+
+const { proyecto } = Astro.props;
+const ruta = `/proyectos/${proyecto.slug}/`;
+
+// Tabla de datos administrativos del proyecto. Se arma en el frontmatter para
+// que el marcado quede en un solo bucle y para que anadir un campo maniana no
+// obligue a tocar el HTML. `temas` no entra aqui: se pintan como distintivos.
+const datos = [
+  { etiqueta: 'Programa', valor: proyecto.programa },
+  { etiqueta: 'Acción', valor: proyecto.accion },
+  { etiqueta: 'Convocatoria', valor: proyecto.convocatoria },
+  { etiqueta: 'Agencia nacional', valor: proyecto.agencia },
+  { etiqueta: 'Fechas', valor: proyecto.fechasLabel },
+  { etiqueta: 'Duración', valor: proyecto.duracion },
+  { etiqueta: 'Ámbito', valor: proyecto.ambito },
+];
+
+// `badgeColor` es el color identitario del proyecto (terracota para el KA154,
+// turquesa para el KA155). En la ficha no se usa para el distintivo del hero:
+// las clases .badge-* de global.css tienen texto oscuro y sobre el indigo del
+// hero no llegarian a 4,5:1, asi que ahi va .badge-white y el color identitario
+// se aplica como acento en los elementos graficos de la pagina. Se propaga en
+// dos variables porque el tono puro solo vale para trazos y fondos: para texto
+// hay que usar su variante `-texto`.
+const ACENTOS: Record<string, { base: string; texto: string }> = {
+  terracota: { base: 'var(--terracota)', texto: 'var(--terracota-texto)' },
+  turquesa: { base: 'var(--turquesa)', texto: 'var(--turquesa-texto)' },
+  oro: { base: 'var(--oro)', texto: '#8a6112' },
+  indigo: { base: 'var(--indigo-alto)', texto: 'var(--indigo)' },
+};
+const acento = ACENTOS[proyecto.badgeColor] ?? ACENTOS.terracota;
+
+// `proyecto.socios` incluye a la entidad solicitante como primer elemento, asi
+// que contar el array entero publicaba «un consorcio de 7 entidades» y contaba
+// dos veces a la asociacion, en contra de las 6 entidades socias que dicen la
+// banda de cifras de la portada y llms.txt. Se filtra por el campo `tipo`, que
+// es donde consta quien es la solicitante, en lugar de restar uno a ciegas: si
+// maniana la asociacion entra en un consorcio que no coordina, el filtro sigue
+// dando el numero correcto.
+const socias = proyecto.socios.filter((socio) => !/solicitante/i.test(socio.tipo));
+
+// Sin entidades socias, la asociacion ejecuta el proyecto en solitario. Merece
+// decirse con palabras y no dejarlo a la deduccion de quien cuente las tarjetas.
+const enSolitario = socias.length === 0;
+
+const descripcionMeta = `${proyecto.tituloCorto}: proyecto ${proyecto.accion} de ${site.name}, ${proyecto.fechasLabel.toLowerCase()}. ${proyecto.resumen}`
+  .replace(/\s+/g, ' ')
+  .slice(0, 300);
+
+// Nodo Project de schema.org. `provider` referencia por @id el nodo NGO que ya
+// inyecta el BaseLayout, para que buscadores y modelos resuelvan una sola
+// entidad de la asociacion en vez de dos descripciones distintas. Sin importes
+// ni identificadores de expediente: son datos del formulario, no informacion
+// publica del proyecto.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Project',
+  '@id': `${site.url}${ruta}#project`,
+  name: proyecto.titulo,
+  ...(proyecto.tituloEn ? { alternateName: proyecto.tituloEn } : {}),
+  ...(proyecto.acronimo ? { identifier: proyecto.acronimo } : {}),
+  url: `${site.url}${ruta}`,
+  description: proyecto.resumen,
+  startDate: proyecto.inicio,
+  endDate: proyecto.fin,
+  inLanguage: 'es-ES',
+  about: proyecto.temas,
+  provider: { '@id': `${site.url}/#org` },
+  funder: {
+    '@type': 'GovernmentOrganization',
+    name: 'INJUVE — Instituto de la Juventud, Agencia Nacional Española de la Juventud',
+    alternateName: 'INJUVE',
+  },
+  participant: proyecto.socios.map((socio) => ({
+    '@type': 'Organization',
+    name: socio.nombre,
+  })),
+  areaServed: { '@type': 'AdministrativeArea', name: 'Melilla' },
+};
+---
+
+<BaseLayout
+  title={proyecto.tituloCorto}
+  description={descripcionMeta}
+  jsonLd={jsonLd}
+  breadcrumbs={[
+    { name: 'Inicio', url: '/' },
+    { name: 'Proyectos', url: '/proyectos/' },
+    { name: proyecto.tituloCorto, url: ruta },
+  ]}
+>
+  <div class="ficha" style={`--acento: ${acento.base}; --acento-texto: ${acento.texto}`}>
+    <section class="page-hero" aria-label="Presentación del proyecto">
+      <div class="container page-hero-content">
+        <div class="ficha-hero-meta fade-in">
+          <span class="badge badge-white">{proyecto.badge}</span>
+          <span class="ficha-estado">
+            {proyecto.estado === 'activo' ? 'En marcha' : 'Finalizado'}
+          </span>
+        </div>
+
+        <h1 class="fade-in fade-in-delay-1">{proyecto.titulo}</h1>
+
+        {(proyecto.acronimo || proyecto.tituloEn) && (
+          <p class="ficha-subtitulos fade-in fade-in-delay-1">
+            {proyecto.acronimo && <span class="ficha-acronimo">{proyecto.acronimo}</span>}
+            {proyecto.tituloEn && <span class="ficha-titulo-en" lang="en">{proyecto.tituloEn}</span>}
+          </p>
+        )}
+
+        <p class="fade-in fade-in-delay-2">{proyecto.resumen}</p>
+      </div>
+    </section>
+
+    <!-- ── Datos del proyecto ──────────────────────────────── -->
+    <section class="section-sm ficha-datos-seccion" aria-labelledby="datos-titulo">
+      <div class="container">
+        <h2 class="ficha-datos-titulo" id="datos-titulo">Datos del proyecto</h2>
+
+        <dl class="ficha-datos fade-in">
+          {datos.map((dato) => (
+            <div class="ficha-dato">
+              <dt>{dato.etiqueta}</dt>
+              <dd>{dato.valor}</dd>
+            </div>
+          ))}
+          <div class="ficha-dato ficha-dato-ancho">
+            <dt>Temas</dt>
+            <dd>
+              <ul class="ficha-temas">
+                {proyecto.temas.map((tema) => (
+                  <li><span class="badge badge-indigo">{tema}</span></li>
+                ))}
+              </ul>
+            </dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <!-- ── Por que este proyecto ───────────────────────────── -->
+    <section class="section section-cal" aria-labelledby="problema-titulo">
+      <div class="container">
+        <div class="ficha-cabecera fade-in">
+          <span class="section-label">Punto de partida</span>
+          <h2 class="section-title" id="problema-titulo">Por qué este proyecto</h2>
+        </div>
+
+        <ul class="ficha-problema">
+          {proyecto.problema.map((parrafo, i) => (
+            <li class:list={['fade-in', `fade-in-delay-${(i % 3) + 1}`]}>{parrafo}</li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ── Objetivos ───────────────────────────────────────── -->
+    <section class="section" aria-labelledby="objetivos-titulo">
+      <div class="container">
+        <div class="ficha-cabecera fade-in">
+          <span class="section-label">Para qué</span>
+          <h2 class="section-title" id="objetivos-titulo">Objetivos</h2>
+        </div>
+
+        <div class="ficha-objetivos">
+          <div class="ficha-objetivo-general card-plana fade-in">
+            <h3>Objetivo general</h3>
+            <p>{proyecto.objetivoGeneral}</p>
+          </div>
+
+          <div class="ficha-objetivos-especificos fade-in fade-in-delay-1">
+            <h3>Objetivos específicos</h3>
+            <ol class="ficha-lista-numerada">
+              {proyecto.objetivosEspecificos.map((objetivo) => (
+                <li>{objetivo}</li>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Quien participa ─────────────────────────────────── -->
+    <section class="section section-cal" aria-labelledby="destinatarios-titulo">
+      <div class="container">
+        <div class="ficha-cabecera fade-in">
+          <span class="section-label">Personas</span>
+          <h2 class="section-title" id="destinatarios-titulo">Quién participa</h2>
+        </div>
+
+        <ul class="ficha-problema">
+          {proyecto.destinatarios.map((destinatario, i) => (
+            <li class:list={['fade-in', `fade-in-delay-${(i % 3) + 1}`]}>{destinatario}</li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ── Actividades ─────────────────────────────────────── -->
+    <section class="section" aria-labelledby="actividades-titulo">
+      <div class="container">
+        <div class="ficha-cabecera fade-in">
+          <span class="section-label">Qué se va a hacer</span>
+          <h2 class="section-title" id="actividades-titulo">Actividades</h2>
+          <p class="section-subtitle">
+            Ninguna se ha celebrado todavía: estas son las actividades aprobadas y
+            su planificación.
+          </p>
+        </div>
+
+        <div class="grid-2">
+          {proyecto.actividades.map((actividad, i) => (
+            <article class:list={['ficha-actividad', 'card', 'fade-in', `fade-in-delay-${(i % 3) + 1}`]}>
+              {/* La numeracion es un contador propio de la ficha. Antes se
+                  imprimia `actividad.id`, que es el identificador del formulario
+                  de solicitud (YPEVM01, DEUIN1...): un dato del expediente que
+                  src/data/proyectos.ts declara expresamente que no se publica. */}
+              <div class="actividad-cabecera">
+                <span class="actividad-num">{String(i + 1).padStart(2, '0')}</span>
+                <span class="actividad-tipo">{actividad.tipo}</span>
+              </div>
+
+              <h3>{actividad.titulo}</h3>
+
+              <dl class="actividad-datos">
+                <div>
+                  <dt>Lugar</dt>
+                  <dd>{actividad.lugar}</dd>
+                </div>
+                {actividad.fechas && (
+                  <div>
+                    <dt>Fechas</dt>
+                    <dd>{actividad.fechas}</dd>
+                  </div>
+                )}
+                <div>
+                  <dt>Duración</dt>
+                  <dd>{actividad.duracion}</dd>
+                </div>
+                <div>
+                  <dt>Participantes</dt>
+                  <dd>{actividad.participantes}</dd>
+                </div>
+              </dl>
+
+              <p class="actividad-descripcion">{actividad.descripcion}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Como se desarrolla ──────────────────────────────── -->
+    <section class="section section-cal" aria-labelledby="fases-titulo">
+      <div class="container">
+        <div class="ficha-cabecera fade-in">
+          <span class="section-label">Plan de trabajo</span>
+          <h2 class="section-title" id="fases-titulo">Cómo se desarrolla</h2>
+        </div>
+
+        <ol class="ficha-fases">
+          {proyecto.fases.map((fase, i) => (
+            <li class:list={['ficha-fase', 'fade-in', `fade-in-delay-${(i % 3) + 1}`]}>
+              <span class="fase-punto" aria-hidden="true"></span>
+              <div class="fase-cuerpo">
+                <span class="fase-mes">{fase.mes}</span>
+                <h3>{fase.titulo}</h3>
+                <p class="fase-objetivo">{fase.objetivo}</p>
+                <ul class="fase-hitos">
+                  {fase.hitos.map((hito) => (
+                    <li>{hito}</li>
+                  ))}
+                </ul>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+
+    <!-- ── Quien lo hace ───────────────────────────────────── -->
+    <section class="section" aria-labelledby="socios-titulo">
+      <div class="container">
+        <div class="ficha-cabecera fade-in">
+          <span class="section-label">Consorcio</span>
+          <h2 class="section-title" id="socios-titulo">Quién lo hace</h2>
+          <p class="section-subtitle">
+            {enSolitario
+              ? `${site.name} ejecuta este proyecto en solitario: no hay organizaciones socias, la asociación es la única entidad participante.`
+              : `${site.name} coordina el proyecto y lo ejecuta junto a ${socias.length} entidades socias: ${proyecto.socios.length} entidades en total.`}
+          </p>
+        </div>
+
+        <ul class="grid-3">
+          {proyecto.socios.map((socio, i) => (
+            <li class:list={['ficha-socio', 'card-plana', 'fade-in', `fade-in-delay-${(i % 3) + 1}`]}>
+              <h3>{socio.nombre}</h3>
+              <p class="socio-tipo">{socio.tipo}</p>
+              <p class="socio-pais">{socio.pais}</p>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ── Resultados previstos ────────────────────────────── -->
+    <section class="section section-cal" aria-labelledby="resultados-titulo">
+      <div class="container">
+        <div class="ficha-cabecera fade-in">
+          <span class="section-label">Qué va a quedar</span>
+          <h2 class="section-title" id="resultados-titulo">Resultados previstos</h2>
+        </div>
+
+        <ul class="ficha-problema">
+          {proyecto.resultados.map((resultado, i) => (
+            <li class:list={['fade-in', `fade-in-delay-${(i % 3) + 1}`]}>{resultado}</li>
+          ))}
+        </ul>
+      </div>
+    </section>
+
+    <!-- ── Impacto esperado ───────────────────────────────── -->
+    <section class="section" aria-labelledby="impacto-titulo">
+      <div class="container">
+        <div class="ficha-cabecera fade-in">
+          <span class="section-label">Alcance</span>
+          <h2 class="section-title" id="impacto-titulo">Impacto esperado</h2>
+        </div>
+
+        <div class="grid-2">
+          {proyecto.impacto.map((bloque, i) => (
+            <article class:list={['ficha-impacto', 'card-plana', 'fade-in', `fade-in-delay-${(i % 3) + 1}`]}>
+              <h3>{bloque.ambito}</h3>
+              <p>{bloque.texto}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <Bitacora project={proyecto.slug} />
+
+    <EUBanner programas={`${proyecto.programa} · ${proyecto.accion}`} />
+  </div>
+</BaseLayout>
+
+<style>
+  /* El div .ficha solo existe para colgar de el las variables de acento del
+     proyecto, asi que no lleva estilos propios mas alla de no interferir en la
+     maquetacion de las secciones que envuelve. */
+  .ficha {
+    display: block;
+  }
+
+  /* ── Hero ── */
+  .ficha-hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.1rem;
+  }
+  .ficha-estado {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.82);
+  }
+  .ficha-estado::before {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--oro);
+  }
+
+  .ficha-subtitulos {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin-bottom: 1.25rem;
+    max-width: 720px;
+  }
+  .ficha-acronimo {
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--oro);
+  }
+  .ficha-titulo-en {
+    font-size: 0.98rem;
+    color: rgba(255, 255, 255, 0.62);
+    font-style: italic;
+  }
+
+  /* ── Datos administrativos ── */
+  .ficha-datos-seccion {
+    background: #fff;
+    border-bottom: 1px solid var(--linea);
+  }
+  /* El titulo de esta tabla es un encabezado real para no romper la jerarquia,
+     pero visualmente es una etiqueta: la tabla se explica sola. */
+  .ficha-datos-titulo {
+    font-family: 'DM Sans Variable', 'DM Sans', 'DM Sans Fallback', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--terracota-texto);
+    margin-bottom: 1.35rem;
+  }
+  .ficha-datos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.35rem 2rem;
+  }
+  .ficha-dato dt {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tinta-tenue);
+    margin-bottom: 0.3rem;
+  }
+  .ficha-dato dd {
+    font-size: 0.95rem;
+    color: var(--indigo);
+    line-height: 1.55;
+  }
+  .ficha-dato-ancho {
+    grid-column: 1 / -1;
+  }
+  .ficha-temas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  /* ── Cabeceras de seccion ── */
+  .ficha-cabecera {
+    max-width: 640px;
+    margin-bottom: 2.25rem;
+  }
+
+  /* ── Listas de parrafos (problema, destinatarios, resultados) ── */
+  .ficha-problema {
+    display: grid;
+    gap: 1rem;
+    max-width: 860px;
+  }
+  .ficha-problema li {
+    position: relative;
+    padding-left: 1.6rem;
+    color: var(--tinta-suave);
+    line-height: 1.75;
+  }
+  .ficha-problema li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.66em;
+    width: 0.5rem;
+    height: 0.5rem;
+    background: var(--oro);
+    border-radius: 50%;
+  }
+
+  /* ── Objetivos ── */
+  .ficha-objetivos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.75rem;
+    align-items: start;
+  }
+  .ficha-objetivo-general {
+    padding: 1.6rem 1.75rem;
+    border-left: 3px solid var(--acento);
+  }
+  .ficha-objetivo-general h3,
+  .ficha-objetivos-especificos h3 {
+    font-size: 1.15rem;
+    color: var(--indigo);
+    margin-bottom: 0.7rem;
+  }
+  .ficha-objetivo-general p {
+    color: var(--tinta-suave);
+    line-height: 1.75;
+  }
+  /* La numeracion se dibuja a mano porque el reset del sitio quita los
+     marcadores nativos de las listas. */
+  .ficha-lista-numerada {
+    counter-reset: objetivo;
+    display: grid;
+    gap: 0.9rem;
+  }
+  .ficha-lista-numerada li {
+    counter-increment: objetivo;
+    position: relative;
+    padding-left: 2.3rem;
+    color: var(--tinta-suave);
+    line-height: 1.75;
+  }
+  .ficha-lista-numerada li::before {
+    content: counter(objetivo);
+    position: absolute;
+    left: 0;
+    top: 0.1em;
+    width: 1.6rem;
+    height: 1.6rem;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--turquesa-dim);
+    color: var(--turquesa-texto);
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  /* ── Actividades ── */
+  .ficha-actividad {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 1.6rem;
+  }
+  .actividad-cabecera {
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+  }
+  .actividad-num {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--tinta-tenue);
+    font-variant-numeric: tabular-nums;
+  }
+  .actividad-tipo {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--acento-texto);
+  }
+  .ficha-actividad h3 {
+    font-size: 1.22rem;
+    color: var(--indigo);
+  }
+  .actividad-datos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.75rem 1.25rem;
+    padding: 0.9rem 0;
+    border-top: 1px solid var(--linea);
+    border-bottom: 1px solid var(--linea);
+  }
+  .actividad-datos dt {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--tinta-tenue);
+  }
+  .actividad-datos dd {
+    font-size: 0.88rem;
+    color: var(--indigo);
+    line-height: 1.5;
+  }
+  .actividad-descripcion {
+    color: var(--tinta-suave);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  /* ── Fases ── */
+  .ficha-fases {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding-left: 1.75rem;
+    max-width: 860px;
+  }
+  .ficha-fases::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 0.6rem;
+    bottom: 0.6rem;
+    width: 2px;
+    background: var(--linea);
+  }
+  .ficha-fase {
+    position: relative;
+  }
+  .fase-punto {
+    position: absolute;
+    left: -1.75rem;
+    top: 0.5rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--acento);
+    border: 3px solid var(--cal-oscuro);
+    box-shadow: 0 0 0 1px var(--acento);
+  }
+  .fase-cuerpo {
+    background: #fff;
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-md);
+    padding: 1.3rem 1.55rem;
+  }
+  .fase-mes {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--acento-texto);
+    margin-bottom: 0.3rem;
+  }
+  .ficha-fase h3 {
+    font-size: 1.15rem;
+    color: var(--indigo);
+    margin-bottom: 0.4rem;
+  }
+  .fase-objetivo {
+    color: var(--tinta-suave);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    margin-bottom: 0.8rem;
+  }
+  .fase-hitos {
+    display: grid;
+    gap: 0.4rem;
+  }
+  .fase-hitos li {
+    position: relative;
+    padding-left: 1.1rem;
+    font-size: 0.92rem;
+    color: var(--tinta-suave);
+    line-height: 1.6;
+  }
+  .fase-hitos li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 0.35rem;
+    height: 0.35rem;
+    background: var(--oro);
+    border-radius: 50%;
+  }
+
+  /* ── Socios ── */
+  .ficha-socio {
+    padding: 1.4rem 1.5rem;
+  }
+  .ficha-socio h3 {
+    font-size: 1.05rem;
+    color: var(--indigo);
+    margin-bottom: 0.45rem;
+    line-height: 1.35;
+  }
+  .socio-tipo {
+    font-size: 0.86rem;
+    color: var(--tinta-suave);
+    line-height: 1.55;
+  }
+  .socio-pais {
+    font-size: 0.8rem;
+    color: var(--tinta-tenue);
+    margin-top: 0.35rem;
+  }
+
+  /* ── Impacto ── */
+  .ficha-impacto {
+    padding: 1.6rem 1.75rem;
+    border-top: 3px solid var(--oro);
+  }
+  .ficha-impacto h3 {
+    font-size: 1.15rem;
+    color: var(--indigo);
+    margin-bottom: 0.55rem;
+  }
+  .ficha-impacto p {
+    color: var(--tinta-suave);
+    line-height: 1.75;
+    font-size: 0.95rem;
+  }
+
+  @media (max-width: 640px) {
+    .fase-cuerpo,
+    .ficha-actividad {
+      padding: 1.2rem 1.15rem;
+    }
+  }
+</style>

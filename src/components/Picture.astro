@@ -1,0 +1,116 @@
+---
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+interface Props {
+  src: string;
+  alt: string;
+  loading?: 'lazy' | 'eager';
+  decoding?: 'async' | 'sync' | 'auto';
+  fetchpriority?: 'high' | 'low' | 'auto';
+  class?: string;
+  width?: number | string;
+  height?: number | string;
+  ariaHidden?: boolean;
+  /** When set, the browser will pick between the small (-card, ~800w),
+   *  the intermediate (-mid, 1200w) if it exists, and the full WebP.
+   *  Pass the layout sizes hint, e.g.
+   *  "(max-width: 768px) 100vw, 380px" for project cards. */
+  sizes?: string;
+}
+
+const {
+  src,
+  alt,
+  loading = 'lazy',
+  decoding = 'async',
+  fetchpriority,
+  class: className,
+  width,
+  height,
+  ariaHidden = false,
+  sizes,
+} = Astro.props;
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const clean = src.replace(/^\//, '');
+const fullSrc = `${base}/${clean}`;
+
+const isRaster = /\.(jpe?g|png)$/i.test(clean);
+
+// Toda variante WebP se comprueba en disco antes de anunciarla. El navegador
+// elige la fuente de un <picture> por el tipo declarado y no por que el fichero
+// exista, asi que un <source type="image/webp"> que apunta a un WebP que no se
+// ha generado no cae de vuelta al PNG: se ve la imagen rota. Pasa en cuanto se
+// arranca `astro dev` o se construye sin ejecutar antes
+// scripts/generate-webp.mjs, que es el estado actual de public/images/ (no hay
+// ni un .webp generado). Antes solo se comprobaba el escalon de 1200.
+//
+// Ojo: aqui hay que resolver desde process.cwd() y no desde import.meta.url. Al
+// construir, Astro emite este componente en dist/.prerender/chunks/, asi que
+// import.meta.url apunta ahi y cualquier ruta relativa al fichero fuente falla
+// (se probo y el escalon de 1200 desaparecia del srcset en todo el sitio).
+const existeEnPublic = (rel: string) => existsSync(resolve(process.cwd(), 'public', rel));
+const variante = (sufijo: string) =>
+  isRaster ? clean.replace(/\.(jpe?g|png)$/i, sufijo) : null;
+
+const webpRel = variante('.webp');
+const webpSrc = webpRel && existeEnPublic(webpRel) ? `${base}/${webpRel}` : null;
+
+// scripts/generate-webp.mjs solo crea los escalones de 800 (-card) y 1200 (-mid)
+// donde hacen falta, asi que su ausencia es normal y no un error: el srcset se
+// arma con los que existan.
+const cardRel = variante('-card.webp');
+const cardSrc = cardRel && existeEnPublic(cardRel) ? `${base}/${cardRel}` : null;
+
+const midRel = variante('-mid.webp');
+const midSrc = midRel && existeEnPublic(midRel) ? `${base}/${midRel}` : null;
+
+// El srcset con varios anchos solo se usa cuando quien invoca el componente ha
+// dado la pista `sizes`; sin ella el navegador no puede elegir bien y se sirve
+// una sola fuente WebP.
+const webpSrcset = sizes && cardSrc && webpSrc
+  ? [`${cardSrc} 800w`, midSrc ? `${midSrc} 1200w` : null, `${webpSrc} 1800w`]
+      .filter(Boolean)
+      .join(', ')
+  : webpSrc;
+---
+
+{webpSrc ? (
+  <picture class="estrellas-picture">
+    <source
+      type="image/webp"
+      srcset={webpSrcset}
+      sizes={sizes}
+    />
+    <img
+      src={fullSrc}
+      alt={alt}
+      loading={loading}
+      decoding={decoding}
+      fetchpriority={fetchpriority}
+      class={className}
+      width={width}
+      height={height}
+      aria-hidden={ariaHidden ? 'true' : undefined}
+    />
+  </picture>
+) : (
+  <img
+    src={fullSrc}
+    alt={alt}
+    loading={loading}
+    decoding={decoding}
+    fetchpriority={fetchpriority}
+    class={className}
+    width={width}
+    height={height}
+    aria-hidden={ariaHidden ? 'true' : undefined}
+  />
+)}
+
+<style is:global>
+  picture.estrellas-picture {
+    display: contents;
+  }
+</style>

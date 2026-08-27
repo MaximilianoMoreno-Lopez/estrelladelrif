@@ -1,0 +1,122 @@
+---
+// Listado de proyectos. Hoy son dos, los dos aprobados en la convocatoria 2026
+// ronda 1, y los dos siguen en marcha: no hay proyectos finalizados que separar
+// en un bloque de archivo, asi que la pagina es una sola rejilla ordenada por el
+// campo `orden` de cada ficha.
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProyectoCard from '../components/ProyectoCard.astro';
+import EUBanner from '../components/EUBanner.astro';
+import { proyectos } from '../data/proyectos';
+import { site } from '../data/site';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Se copia el array antes de ordenar: `sort` muta en el sitio y el array
+// exportado de proyectos.ts lo consumen tambien la portada y las fichas.
+const listado = [...proyectos].sort((a, b) => a.orden - b.orden);
+
+// Nodo ItemList para que el listado se lea como coleccion y cada elemento
+// apunte al nodo Project que declara su propia ficha.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: `Proyectos de ${site.name}`,
+  itemListOrder: 'https://schema.org/ItemListOrderAscending',
+  numberOfItems: listado.length,
+  itemListElement: listado.map((proyecto, i) => ({
+    '@type': 'ListItem',
+    position: i + 1,
+    name: proyecto.titulo,
+    url: `${site.url}/proyectos/${proyecto.slug}/`,
+  })),
+};
+---
+
+<BaseLayout
+  title="Proyectos"
+  description="Los proyectos Erasmus+ de Estrella del Rif: «Democracia sin barreras» (KA154) y «Melilla is Europe» (KA155), aprobados en la convocatoria 2026 ronda 1."
+  jsonLd={jsonLd}
+  breadcrumbs={[
+    { name: 'Inicio', url: '/' },
+    { name: 'Proyectos', url: '/proyectos/' },
+  ]}
+>
+  <section class="page-hero" aria-label="Presentación de los proyectos">
+    <div class="container page-hero-content">
+      <span class="badge badge-white fade-in">Convocatoria 2026, ronda 1</span>
+      <h1 class="fade-in fade-in-delay-1">Proyectos</h1>
+      <p class="fade-in fade-in-delay-2">
+        Dos proyectos de juventud aprobados y en marcha: uno de participación
+        democrática inclusiva a escala nacional y otro de movilidad europea para
+        jóvenes de Melilla. Cada ficha recoge los objetivos, las actividades
+        previstas y el seguimiento de lo que se vaya haciendo.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="listado-titulo">
+    <div class="container">
+      <h2 class="sr-solo" id="listado-titulo">Listado de proyectos</h2>
+
+      <ul class="grid-2 proyectos-rejilla">
+        {listado.map((proyecto, i) => (
+          <li class:list={['fade-in', `fade-in-delay-${i + 1}`]}>
+            <ProyectoCard proyecto={proyecto} />
+          </li>
+        ))}
+      </ul>
+
+      <p class="nota-financiacion fade-in fade-in-delay-3">
+        Los dos proyectos están financiados por el programa Erasmus+ Juventud a
+        través del INJUVE, la Agencia Nacional Española de la Juventud (ES02).
+        Las cifras de subvención de cada uno se publican en
+        {' '}<a href={`${base}/transparencia/`}>Transparencia</a>.
+      </p>
+    </div>
+  </section>
+
+  <EUBanner programas="Erasmus+ Juventud · KA154-YOU y KA155-YOU" />
+</BaseLayout>
+
+<style>
+  .page-hero .badge {
+    margin-bottom: 1.1rem;
+  }
+
+  /* El titulo del listado existe para que la seccion tenga nombre accesible sin
+     repetir visualmente lo que ya dice el h1. No se usa display:none porque eso
+     lo esconderia tambien de los lectores de pantalla. */
+  .sr-solo {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .proyectos-rejilla {
+    align-items: stretch;
+  }
+  .proyectos-rejilla > li {
+    display: flex;
+  }
+  .proyectos-rejilla > li > :global(*) {
+    width: 100%;
+  }
+
+  .nota-financiacion {
+    margin-top: 2.5rem;
+    max-width: 720px;
+    font-size: 0.92rem;
+    color: var(--tinta-suave);
+    line-height: 1.7;
+    padding-left: 1rem;
+    border-left: 3px solid var(--oro);
+  }
+  .nota-financiacion a {
+    color: var(--terracota-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

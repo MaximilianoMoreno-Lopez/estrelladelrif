@@ -1,0 +1,593 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const ICON = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+
+// Nodo AboutPage. No repite los datos de la organizacion: los referencia por el
+// @id que ya publica BaseLayout, para que buscadores y modelos resuelvan una sola
+// entidad "Estrella del Rif" en todo el sitio en vez de dos descripciones que
+// habria que mantener sincronizadas a mano.
+const aboutPageNode = {
+  '@context': 'https://schema.org',
+  '@type': 'AboutPage',
+  '@id': `${site.url}/sobre-nosotros/#pagina`,
+  url: `${site.url}/sobre-nosotros/`,
+  name: `Sobre ${site.name}`,
+  description:
+    'Quiénes somos, misión, valores, equipo y datos identificativos de ' +
+    `${site.name}, asociación juvenil de Melilla constituida en ${site.founded}.`,
+  inLanguage: 'es-ES',
+  isPartOf: { '@id': `${site.url}/#website` },
+  about: { '@id': `${site.url}/#org` },
+  mainEntity: { '@id': `${site.url}/#org` },
+};
+
+// Cifras de contexto de Melilla y de la juventud espanola. Cada una viaja con su
+// fuente en el propio objeto y no en un pie de seccion suelto: asi es imposible
+// publicar una cifra sin atribucion, y si alguna se actualiza se cambia el dato y
+// la fuente en el mismo sitio.
+const cifras = [
+  {
+    valor: '23,4 %',
+    titulo: 'Desempleo juvenil en España',
+    // "de los veintisiete" era una precision anadida: la fuente dice "tercera
+    // tasa mas alta de la Union", sin contar Estados miembros. Se cita tal cual.
+    detalle:
+      'A cierre de 2025: 8,7 puntos por encima de la media de la UE y tercera tasa más alta de la Unión.',
+    fuente: 'Eurostat, 2026',
+  },
+  {
+    valor: '58 %',
+    titulo: 'Desempleo juvenil en Melilla',
+    // Se retira "mas del doble de la media espanola": era un calculo propio a
+    // partir de dos cifras de fuentes y anos distintos (58 % de El Faro de
+    // Melilla, 2025 y 23,4 % de Eurostat, 2026) presentado con la atribucion de
+    // la primera, que no hace esa comparacion.
+    detalle: 'La tasa de desempleo juvenil de la ciudad superó esa cifra.',
+    fuente: 'El Faro de Melilla, 2025',
+  },
+  {
+    valor: '12,3 %',
+    titulo: 'Jóvenes que ni estudian ni trabajan',
+    detalle: 'Media del conjunto de España.',
+    fuente: 'El Faro de Melilla, 2025',
+  },
+  {
+    valor: '18 %',
+    titulo: 'La misma cifra, en Melilla',
+    detalle: 'Melilla es la región española con más jóvenes que ni estudian ni trabajan.',
+    fuente: 'El Faro de Melilla, 2025',
+  },
+  {
+    valor: '6 de cada 10',
+    titulo: 'No se sienten representados',
+    detalle:
+      'Proporción de jóvenes en España que no se sienten representados en el sistema político.',
+    fuente: 'Consejo de la Juventud de España, 2025',
+  },
+];
+
+const valores = [
+  {
+    titulo: 'La diversidad, como punto de partida',
+    icono: `<svg ${ICON}><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19"/><path d="M12 2.5a14 14 0 0 1 0 19 14 14 0 0 1 0-19z"/></svg>`,
+    texto:
+      'Melilla es intercultural antes de que nadie lo organice. Nuestro trabajo no consiste en gestionar esa diversidad como un riesgo, sino en tratarla como el material con el que se construye la convivencia.',
+  },
+  {
+    titulo: 'Accesibilidad sin excepciones',
+    icono: `<svg ${ICON}><path d="M12 4.6a1.6 1.6 0 1 0 0-3.2 1.6 1.6 0 0 0 0 3.2z"/><path d="M6 8l6 1.4L18 8"/><path d="M12 9.4V14"/><path d="M12 14l-3.2 8"/><path d="M12 14l3.2 8"/></svg>`,
+    texto:
+      'Una actividad a la que no puede venir alguien por cómo está diseñada es una actividad mal diseñada. La accesibilidad se decide al planificar, no cuando alguien la reclama.',
+  },
+  {
+    titulo: 'Las personas jóvenes deciden',
+    icono: `<svg ${ICON}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`,
+    texto:
+      'Eligen los temas, facilitan las sesiones y firman las propuestas. La asociación pone el marco y la logística; el contenido y la voz son suyos.',
+  },
+  {
+    titulo: 'Rendir cuentas',
+    icono: `<svg ${ICON}><path d="M14 2H6.5A2.5 2.5 0 0 0 4 4.5v15A2.5 2.5 0 0 0 6.5 22h11a2.5 2.5 0 0 0 2.5-2.5V8z"/><path d="M14 2v6h6"/><path d="M9 14l2 2 4-4"/></svg>`,
+    texto:
+      'Gestionamos fondos públicos europeos. Publicamos qué se financia, con cuánto y para qué, sin esperar a que nadie lo pida.',
+  },
+  {
+    titulo: 'Ciudadanía europea desde la periferia',
+    icono: `<svg ${ICON}><circle cx="12" cy="12" r="9.5"/><path d="M12 7.2l1.5 3 3.3.5-2.4 2.4.6 3.3-3-1.6-3 1.6.6-3.3L7.2 10.7l3.3-.5z"/></svg>`,
+    texto:
+      'Europa se explica distinto en una ciudad sin conexión terrestre con el continente. Nuestro trabajo consiste en que las oportunidades europeas lleguen también aquí y se vean.',
+  },
+];
+
+// Perfiles del equipo tal y como constan en la seccion de personas clave del PIF
+// 2026. A proposito no hay correos ni telefonos personales: el PIF los contiene,
+// pero la web solo expone el buzon y el telefono de la asociacion. Las iniciales
+// sustituyen a la foto porque no hay retratos con consentimiento de publicacion.
+const equipo = [
+  {
+    nombre: 'Mohamed Abdelkader Kichouh',
+    iniciales: 'MA',
+    cargo: 'Presidente y representante legal',
+    parrafos: [
+      'Activista de la participación juvenil y miembro del equipo de dirección ejecutiva de Scouts de España, la mayor organización juvenil del país.',
+      'Ha trabajado activamente por la participación juvenil desde muy joven, incluida la creación de foros abiertos para toda la ciudadanía de Melilla. Es monitor y director de actividades de tiempo libre, y trabaja con educación no formal con jóvenes y con niñas y niños de la ciudad en su grupo scout.',
+    ],
+  },
+  {
+    nombre: 'Pablo Sánchez Ruiz',
+    iniciales: 'PS',
+    cargo: 'Vicepresidente y persona de contacto',
+    parrafos: [
+      'Graduado en Educación Primaria y en Ciencias de la Actividad Física y del Deporte por la Universidad de Granada, y máster en Profesorado de Secundaria por la Universidad de Sevilla.',
+      'Profesor de Educación Física y representante internacional de ASDE-Scouts de España, participa y organiza encuentros y reuniones de coordinación con comisionados internacionales de la red mundial del escultismo. Desde 2019 prepara y organiza foros juveniles. Amplia experiencia en representación y gobernanza juvenil.',
+    ],
+  },
+  {
+    nombre: 'Maximiliano Moreno-López',
+    iniciales: 'MM',
+    cargo: null,
+    parrafos: [
+      'Investigador en el Ministerio para la Transición Ecológica en política pública ambiental y economista en el Banco de España. Doctorando en Economía Ambiental; ha sido profesor ayudante en la Universidad de la Sorbona y en Sciences Po.',
+      'Ha coordinado y facilitado varios proyectos y ha participado en programas de movilidad de corta y larga duración, además de en eventos juveniles europeos representando la voz de la juventud española. Aporta capacidad analítica y conocimiento científico actualizado, en particular en iniciativas ambientales y de política pública.',
+    ],
+  },
+];
+
+// Direccion postal montada desde site.ts para no tener una segunda copia de la
+// sede en el repositorio.
+const sede = `${site.address.street}, ${site.address.postalCode} ${site.address.city}`;
+---
+
+<BaseLayout
+  title="Sobre nosotros"
+  description="Estrella del Rif es una asociación juvenil sin ánimo de lucro de Melilla, constituida en 2024 y formada íntegramente por voluntariado. Misión, valores, equipo y datos identificativos."
+  breadcrumbs={[
+    { name: 'Inicio', url: '/' },
+    { name: 'Sobre nosotros', url: '/sobre-nosotros/' },
+  ]}
+  jsonLd={aboutPageNode}
+>
+  <section class="page-hero" aria-label="Presentación de la asociación">
+    <div class="container page-hero-content">
+      <p class="section-label section-label-claro fade-in">La asociación</p>
+      <h1 class="fade-in fade-in-delay-1">Sobre nosotros</h1>
+      <p class="fade-in fade-in-delay-2">
+        Una asociación juvenil de Melilla, constituida en {site.founded} y sostenida por
+        cinco personas voluntarias. Trabajamos donde vivimos, con las oportunidades
+        europeas como herramienta.
+      </p>
+    </div>
+  </section>
+
+  <section id="quienes-somos" class="section" aria-labelledby="quienes-somos-titulo">
+    <div class="container-estrecho">
+      <div class="divider fade-in" aria-hidden="true"></div>
+      <p class="section-label fade-in">Quiénes somos</p>
+      <h2 id="quienes-somos-titulo" class="section-title fade-in">
+        Cinco personas voluntarias y una ciudad
+      </h2>
+      <div class="prosa fade-in">
+        <p>
+          <strong>{site.name}</strong> es una asociación juvenil sin ánimo de lucro con
+          sede en Melilla, constituida en {site.founded}. No es un organismo público ni
+          depende de ninguna administración.
+        </p>
+        <p>
+          Está formada íntegramente por voluntariado: <strong>cinco personas</strong> que
+          coordinan actividades, facilitan sesiones de aprendizaje y gestionan las
+          alianzas y la ejecución de los proyectos. No hay estructura contratada, así que
+          lo que se anuncia es lo que estas cinco personas pueden sostener de verdad.
+        </p>
+        <p>
+          Trabajamos a nivel local con un <strong>enfoque intercultural fuerte</strong>,
+          que refleja la diversidad cultural de la ciudad. Es una decisión de método antes
+          que un principio: en Melilla, cualquier actividad juvenil que ignore esa
+          diversidad se queda sin la mitad de sus participantes.
+        </p>
+        <p>
+          Ante los programas europeos somos una entidad de nueva incorporación: sin
+          acreditación Erasmus+ previa y con los dos primeros proyectos aprobados en la
+          convocatoria de 2026.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="mision" class="section section-cal" aria-labelledby="mision-titulo">
+    <div class="container-estrecho">
+      <p class="section-label fade-in">Misión</p>
+      <h2 id="mision-titulo" class="section-title fade-in">Para qué existimos</h2>
+      <!-- La mision se cita literal, tal como consta en el PIF 2026: es el texto que
+           la asociacion ha registrado ante la agencia nacional y reescribirlo en la
+           web crearia dos versiones distintas de lo mismo. -->
+      <blockquote class="mision fade-in">
+        <p>
+          Empoderar a las personas jóvenes de Melilla mediante la educación no formal,
+          promoviendo los valores europeos, la ciudadanía activa y la participación en la
+          vida democrática, y haciendo visible el impacto positivo de las oportunidades de
+          la Unión Europea en la juventud, especialmente en regiones alejadas como
+          Melilla.
+        </p>
+      </blockquote>
+      <p class="mision-pie fade-in">
+        Misión de la asociación, según sus fines constitutivos.
+      </p>
+    </div>
+  </section>
+
+  <section id="por-que-melilla" class="section" aria-labelledby="por-que-melilla-titulo">
+    <div class="container">
+      <div class="melilla-intro">
+        <div class="divider fade-in" aria-hidden="true"></div>
+        <p class="section-label fade-in">Contexto</p>
+        <h2 id="por-que-melilla-titulo" class="section-title fade-in">Por qué Melilla</h2>
+        <div class="prosa fade-in melilla-prosa">
+          <p>
+            <strong>Melilla no tiene conexión terrestre con Europa continental.</strong>
+            Para salir de la ciudad hay que coger un barco o un avión. Eso no es una
+            anécdota geográfica: encarece y complica cualquier movilidad, reduce el número
+            de jóvenes que participan en programas europeos y hace que las oportunidades
+            que se anuncian «para toda la Unión» lleguen aquí más tarde y a menos gente.
+          </p>
+          <p>
+            A esa distancia se suma un contexto socioeconómico duro, sobre todo para la
+            juventud. Estas son las cifras con las que trabajamos.
+          </p>
+        </div>
+      </div>
+
+      <ul class="cifras" aria-label="Cifras de contexto de la juventud en España y en Melilla">
+        {cifras.map((cifra, i) => (
+          <li class:list={['cifra', 'card-plana', 'fade-in', `fade-in-delay-${Math.min(i + 1, 4)}`]}>
+            <p class="cifra-valor">{cifra.valor}</p>
+            <p class="cifra-titulo">{cifra.titulo}</p>
+            <p class="cifra-detalle">{cifra.detalle}</p>
+            <p class="cifra-fuente">({cifra.fuente})</p>
+          </li>
+        ))}
+      </ul>
+
+      <div class="prosa fade-in melilla-cierre">
+        <p>
+          Con este punto de partida, la educación no formal no es un complemento
+          agradable: es una de las pocas vías por las que una persona joven de Melilla
+          puede adquirir competencias, salir de la ciudad y volver con algo que aquí no
+          tenía. Por eso la asociación trabaja donde trabaja.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section id="valores" class="section section-cal" aria-labelledby="valores-titulo">
+    <div class="container">
+      <div class="valores-intro fade-in">
+        <p class="section-label">Valores</p>
+        <h2 id="valores-titulo" class="section-title">Lo que no cambia según el proyecto</h2>
+        <p class="section-subtitle">
+          Cinco criterios que se aplican igual a un taller de barrio y a un proyecto
+          europeo de diez meses.
+        </p>
+      </div>
+
+      <div class="grid-3 valores-grid">
+        {valores.map((valor, i) => (
+          <article class:list={['valor', 'card', 'fade-in', `fade-in-delay-${Math.min(i + 1, 4)}`]}>
+            <span class="valor-icono" set:html={valor.icono} aria-hidden="true" />
+            <h3>{valor.titulo}</h3>
+            <p>{valor.texto}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section id="equipo" class="section" aria-labelledby="equipo-titulo">
+    <div class="container">
+      <div class="equipo-intro fade-in">
+        <div class="divider" aria-hidden="true"></div>
+        <p class="section-label">Equipo</p>
+        <h2 id="equipo-titulo" class="section-title">Quién responde de esto</h2>
+        <p class="section-subtitle">
+          La junta directiva y las personas clave de los proyectos. Para contactar con
+          cualquiera de ellas se usa el buzón de la asociación: no publicamos datos de
+          contacto personales.
+        </p>
+      </div>
+
+      <ul class="equipo-lista">
+        {equipo.map((persona, i) => (
+          <li class:list={['persona', 'card-plana', 'fade-in', `fade-in-delay-${Math.min(i + 1, 4)}`]}>
+            <span class="persona-iniciales" aria-hidden="true">{persona.iniciales}</span>
+            <div class="persona-texto">
+              <h3>{persona.nombre}</h3>
+              {persona.cargo && <p class="persona-cargo">{persona.cargo}</p>}
+              {persona.parrafos.map((parrafo) => <p class="persona-bio">{parrafo}</p>)}
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  <section id="datos" class="section section-cal" aria-labelledby="datos-titulo">
+    <div class="container-estrecho">
+      <p class="section-label fade-in">Datos identificativos</p>
+      <h2 id="datos-titulo" class="section-title fade-in">La asociación, en su registro</h2>
+
+      <dl class="datos card-plana fade-in">
+        <div class="dato">
+          <dt>Denominación</dt>
+          <dd>{site.legalName}</dd>
+        </div>
+        <div class="dato">
+          <dt>Naturaleza</dt>
+          <dd>
+            Asociación juvenil sin ánimo de lucro. No es un organismo público ni una
+            entidad con fines lucrativos.
+          </dd>
+        </div>
+        <div class="dato">
+          <dt>Año de constitución</dt>
+          <dd>{site.founded}</dd>
+        </div>
+        <div class="dato">
+          <dt>NIF</dt>
+          <dd><span class="mono">{site.nif}</span></dd>
+        </div>
+        <div class="dato">
+          <dt>OID Erasmus+</dt>
+          <dd>
+            <span class="mono">{site.oid}</span>
+            <span class="dato-nota">
+              Identificador de la organización en los programas europeos de juventud.
+            </span>
+          </dd>
+        </div>
+        <div class="dato">
+          <dt>Sede</dt>
+          <dd>{sede}</dd>
+        </div>
+      </dl>
+
+      <div class="datos-enlaces fade-in">
+        <a href={`${base}/transparencia/`} class="btn btn-primary">Transparencia y financiación</a>
+        <a href={`${base}/contacto/`} class="btn btn-outline">Contacto</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* ── Mision ── */
+  .mision {
+    border-left: 4px solid var(--oro);
+    padding: 0.35rem 0 0.35rem 1.5rem;
+    margin: 1.5rem 0 0.9rem;
+  }
+  .mision p {
+    font-family: 'Playfair Display Variable', 'Playfair Display', 'Playfair Display Fallback', Georgia, serif;
+    font-size: clamp(1.15rem, 2.2vw, 1.45rem);
+    line-height: 1.5;
+    color: var(--indigo);
+  }
+  .mision-pie {
+    font-size: 0.85rem;
+    color: var(--tinta-tenue);
+    padding-left: 1.5rem;
+  }
+
+  /* ── Por que Melilla ── */
+  .melilla-intro {
+    max-width: 720px;
+  }
+  .melilla-prosa {
+    margin-top: 0.35rem;
+  }
+  .cifras {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1.25rem;
+    margin: 2.5rem 0;
+  }
+  .cifra {
+    padding: 1.5rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+  .cifra-valor {
+    font-family: 'Playfair Display Variable', 'Playfair Display', 'Playfair Display Fallback', Georgia, serif;
+    font-size: 2.1rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--terracota-texto);
+  }
+  .cifra-titulo {
+    font-weight: 600;
+    color: var(--indigo);
+    font-size: 0.98rem;
+  }
+  .cifra-detalle {
+    font-size: 0.9rem;
+    color: var(--tinta-suave);
+    flex-grow: 1;
+  }
+  /* La fuente se imprime siempre, en el mismo lugar y con el mismo tratamiento en
+     las cinco tarjetas: son cifras de terceros y publicarlas sin atribucion visible
+     no es aceptable ni siquiera en una tarjeta pequena. */
+  .cifra-fuente {
+    font-size: 0.78rem;
+    color: var(--tinta-tenue);
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--linea);
+    margin-top: 0.35rem;
+  }
+  .melilla-cierre {
+    max-width: 720px;
+  }
+
+  /* ── Valores ── */
+  .valores-intro {
+    max-width: 640px;
+    margin-bottom: 2.25rem;
+  }
+  .valor {
+    padding: 1.6rem;
+  }
+  .valor-icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: var(--radius-md);
+    background: var(--turquesa-dim);
+    color: var(--turquesa-texto);
+    margin-bottom: 0.95rem;
+  }
+  /* :global porque el SVG entra por set:html y el compilador no le pone el hash de
+     scope a un marcado que no aparece en la plantilla. */
+  .valor-icono :global(svg) {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+  .valor h3 {
+    font-size: 1.12rem;
+    color: var(--indigo);
+    margin-bottom: 0.5rem;
+  }
+  .valor p {
+    font-size: 0.94rem;
+    color: var(--tinta-suave);
+  }
+
+  /* ── Equipo ── */
+  .equipo-intro {
+    max-width: 680px;
+    margin-bottom: 2.25rem;
+  }
+  .equipo-lista {
+    display: grid;
+    gap: 1.25rem;
+  }
+  .persona {
+    display: flex;
+    gap: 1.4rem;
+    padding: 1.75rem;
+  }
+  /* Iniciales en lugar de retrato: no hay fotografias del equipo con consentimiento
+     de publicacion, y un avatar generico de silueta no aporta nada. Va oculto a los
+     lectores de pantalla porque el nombre completo esta justo al lado. */
+  .persona-iniciales {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.4rem;
+    height: 3.4rem;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--indigo);
+    color: var(--oro);
+    font-family: 'Playfair Display Variable', 'Playfair Display', 'Playfair Display Fallback', Georgia, serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    letter-spacing: 0.02em;
+  }
+  .persona h3 {
+    font-size: 1.25rem;
+    color: var(--indigo);
+  }
+  .persona-cargo {
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--terracota-texto);
+    margin: 0.2rem 0 0.75rem;
+  }
+  .persona-bio {
+    font-size: 0.95rem;
+    color: var(--tinta-suave);
+    margin-bottom: 0.7rem;
+  }
+  .persona-bio:last-child {
+    margin-bottom: 0;
+  }
+  /* Sin cargo el nombre queda pegado a la biografia, asi que el margen se recupera
+     en el primer parrafo. */
+  .persona-cargo + .persona-bio {
+    margin-top: 0;
+  }
+  .persona h3 + .persona-bio {
+    margin-top: 0.6rem;
+  }
+
+  /* ── Datos identificativos ── */
+  .datos {
+    margin: 1.75rem 0 2rem;
+    padding: 0.5rem 1.6rem;
+  }
+  .dato {
+    display: grid;
+    grid-template-columns: 12rem 1fr;
+    gap: 0.5rem 1.5rem;
+    padding: 1.05rem 0;
+    border-bottom: 1px solid var(--linea);
+  }
+  .dato:last-child {
+    border-bottom: none;
+  }
+  .dato dt {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tinta-tenue);
+    padding-top: 0.15rem;
+  }
+  .dato dd {
+    color: var(--indigo);
+    font-size: 0.98rem;
+  }
+  .mono {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+  }
+  .dato-nota {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--tinta-suave);
+    margin-top: 0.25rem;
+    font-weight: 400;
+    letter-spacing: normal;
+  }
+  .datos-enlaces {
+    display: flex;
+    gap: 0.85rem;
+    flex-wrap: wrap;
+  }
+
+  @media (max-width: 640px) {
+    .persona {
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1.4rem;
+    }
+    .dato {
+      grid-template-columns: 1fr;
+      gap: 0.3rem;
+    }
+    .datos {
+      padding: 0.5rem 1.2rem;
+    }
+    .mision,
+    .mision-pie {
+      padding-left: 1.1rem;
+    }
+  }
+</style>

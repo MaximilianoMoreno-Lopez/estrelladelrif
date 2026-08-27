@@ -1,0 +1,656 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
+import { democraciaSinBarreras, melillaIsEurope } from '../data/proyectos';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Datos identificativos. Se leen de site.ts para que no haya dos versiones del
+// NIF o del OID circulando por el repositorio: aqui solo se les pone etiqueta.
+// El tipo va anotado y no inferido: sin la anotacion, TypeScript deduce del
+// array un tipo union en el que solo algunos elementos tienen `tipo`, y leer
+// esa propiedad en la plantilla da error en `astro check`.
+const identificacion: {
+  etiqueta: string;
+  valor: string;
+  tipo?: 'email' | 'telefono';
+}[] = [
+  { etiqueta: 'Denominación', valor: site.legalName },
+  {
+    etiqueta: 'Naturaleza jurídica',
+    valor:
+      'Asociación juvenil sin ánimo de lucro, constituida en ' +
+      site.founded +
+      '. No es un organismo público ni depende de ninguna administración.',
+  },
+  { etiqueta: 'NIF', valor: site.nif },
+  { etiqueta: 'OID Erasmus+', valor: site.oid },
+  {
+    etiqueta: 'Domicilio social',
+    valor: `${site.address.street}, ${site.address.postalCode} ${site.address.city}`,
+  },
+  { etiqueta: 'Ámbito de actuación', valor: `${site.address.region} (España)` },
+  { etiqueta: 'Correo electrónico', valor: site.email, tipo: 'email' },
+  { etiqueta: 'Teléfono', valor: site.phone, tipo: 'telefono' },
+  { etiqueta: 'Sitio web', valor: site.domain },
+];
+
+const junta = [
+  {
+    cargo: 'Presidente y representante legal',
+    nombre: 'Mohamed Abdelkader Kichouh',
+  },
+  {
+    cargo: 'Vicepresidente y persona de contacto',
+    nombre: 'Pablo Sánchez Ruiz',
+  },
+];
+
+// Subvenciones concedidas. Importes literales de las dos resoluciones de la
+// convocatoria 2026 ronda 1; el desglose por partidas es el del presupuesto
+// aprobado. No se redondea nada y no se publica ningun importe ejecutado,
+// porque todavia no hay ejecucion que declarar.
+//
+// Los importes se guardan como numero y se formatean al pintarlos. Antes iban
+// como cadena ya formateada y el total del pie de la tabla estaba escrito a
+// mano ("76.890 €"): cuadraba, pero al corregir o anadir una subvencion el total
+// habria quedado desincronizado en silencio, en la pagina donde menos margen hay
+// para un dato economico equivocado.
+const subvenciones = [
+  {
+    proyecto: democraciaSinBarreras,
+    importe: 49416,
+    partidas: [
+      { partida: 'Costes de proyecto', importe: 5000 },
+      { partida: 'Apoyo a la inclusión de participantes', importe: 900 },
+      { partida: 'Subvención de eventos', importe: 13000 },
+      { partida: 'Costes de actividad de movilidad', importe: 30516 },
+    ],
+  },
+  {
+    proyecto: melillaIsEurope,
+    importe: 27474,
+    partidas: [
+      { partida: 'Pases de viaje', importe: 7290 },
+      { partida: 'Costes de viaje para viajeros de zonas remotas', importe: 3798 },
+      { partida: 'Apoyo organizativo', importe: 1875 },
+      { partida: 'Apoyo individual', importe: 12636 },
+      { partida: 'Apoyo a la inclusión de la organización', importe: 1875 },
+    ],
+  },
+];
+
+// Formato espanol: punto de miles y el simbolo detras, separado por espacio fino
+// irrompible, que es como lo escribe la propia Agencia Nacional.
+const eur = (n: number) =>
+  new Intl.NumberFormat('es-ES', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(n);
+
+const totalConcedido = subvenciones.reduce((suma, s) => suma + s.importe, 0);
+
+// Comprobacion en tiempo de compilacion: si el desglose de una subvencion deja
+// de sumar el importe concedido, el build para en vez de publicar una tabla que
+// no cuadra. Es la unica pagina con cifras economicas y no hay ninguna otra red
+// que lo detecte.
+for (const s of subvenciones) {
+  const suma = s.partidas.reduce((acc, p) => acc + p.importe, 0);
+  if (suma !== s.importe) {
+    throw new Error(
+      `Las partidas de "${s.proyecto.tituloCorto}" suman ${suma} y el importe concedido es ${s.importe}.`,
+    );
+  }
+}
+
+// Documentos institucionales. Todos estan pendientes porque ninguno esta
+// aprobado y publicado todavia: no se enlazan ni se insinua que existan. La
+// columna de estado se mantiene en el codigo para que publicar uno consista en
+// cambiar el estado a Disponible y anadir el href, sin tocar el marcado.
+const documentos = [
+  { nombre: 'Estatutos', estado: 'Próximamente' },
+  { nombre: 'Acta fundacional', estado: 'Próximamente' },
+  { nombre: 'Cuentas anuales', estado: 'Próximamente' },
+  { nombre: 'Código ético', estado: 'Próximamente' },
+  { nombre: 'Plan de igualdad', estado: 'Próximamente' },
+  { nombre: 'Plan de voluntariado', estado: 'Próximamente' },
+  { nombre: 'Política de accesibilidad e inclusión', estado: 'Próximamente' },
+  { nombre: 'Política medioambiental', estado: 'Próximamente' },
+  { nombre: 'Política de protección de la infancia', estado: 'Próximamente' },
+  { nombre: 'Protocolo de prevención del acoso', estado: 'Próximamente' },
+];
+
+// El asunto habla de consulta y no de solicitud: ninguno de estos documentos
+// esta aprobado y publicado todavia, asi que lo que se puede pedir es informacion
+// sobre su estado.
+const asuntoDocs = encodeURIComponent('Consulta sobre documentación institucional');
+---
+
+<BaseLayout
+  title="Transparencia"
+  description="Datos identificativos, junta directiva, financiación pública recibida y documentos institucionales de Estrella del Rif, asociación juvenil de Melilla."
+  breadcrumbs={[
+    { name: 'Inicio', url: '/' },
+    { name: 'Transparencia', url: '/transparencia/' },
+  ]}
+>
+  <section class="page-hero">
+    <div class="container page-hero-content">
+      <h1 class="fade-in">Transparencia</h1>
+      <p class="fade-in fade-in-delay-1">
+        Quiénes somos, quién responde, de dónde sale el dinero y en qué se va a gastar.
+        Cuando un dato todavía no existe, aquí se dice que no existe.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="identificacion">
+    <div class="container-estrecho">
+      <div class="bloque-cabecera fade-in">
+        <p class="section-label">Identificación</p>
+        <h2 class="section-title" id="identificacion">Datos de la entidad</h2>
+      </div>
+
+      <dl class="datos fade-in">
+        {identificacion.map((dato) => (
+          <div class="dato">
+            <dt>{dato.etiqueta}</dt>
+            <dd>
+              {dato.tipo === 'email' ? (
+                <a href={`mailto:${site.email}`}>{dato.valor}</a>
+              ) : dato.tipo === 'telefono' ? (
+                <a href={`tel:${site.phoneHref}`}>{dato.valor}</a>
+              ) : (
+                dato.valor
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
+
+      <p class="nota fade-in">
+        La asociación no tiene acreditación Erasmus+ previa y es una entidad de nueva
+        incorporación a los fondos europeos: los dos proyectos de la convocatoria 2026 son
+        los primeros que gestiona.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-cal" aria-labelledby="junta">
+    <div class="container-estrecho">
+      <div class="bloque-cabecera fade-in">
+        <p class="section-label">Gobierno</p>
+        <h2 class="section-title" id="junta">Junta directiva</h2>
+      </div>
+
+      <ul class="junta fade-in">
+        {junta.map((persona) => (
+          <li class="card-plana">
+            <p class="junta-cargo">{persona.cargo}</p>
+            <p class="junta-nombre">{persona.nombre}</p>
+          </li>
+        ))}
+      </ul>
+
+      <p class="nota fade-in">
+        Los cargos de la junta no son remunerados: la asociación está formada íntegramente
+        por voluntariado. No se publican datos de contacto personales de sus miembros; toda
+        la comunicación se dirige al buzón y al teléfono de la asociación. Las trayectorias
+        del equipo están en <a href={`${base}/sobre-nosotros/`}>Sobre nosotros</a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="financiacion">
+    <div class="container">
+      <div class="bloque-cabecera fade-in">
+        <p class="section-label">Cuentas</p>
+        <h2 class="section-title" id="financiacion">Financiación pública recibida</h2>
+        <p class="section-subtitle">
+          Toda la financiación pública de la asociación procede de dos subvenciones de
+          Erasmus+ Juventud concedidas en la convocatoria 2026, ronda 1, por la Agencia
+          Nacional Española de la Juventud (INJUVE, código ES02). No hay otras
+          subvenciones, ni públicas ni privadas.
+        </p>
+      </div>
+
+      {/* La tabla lleva seis columnas de datos y en un movil no cabe sin
+          apretar los importes hasta hacerlos ilegibles. En vez de esconder
+          columnas se envuelve en un contenedor con scroll horizontal propio,
+          con tabindex para que tambien se pueda desplazar con el teclado. */}
+      <div
+        class="tabla-scroll fade-in"
+        tabindex="0"
+        role="region"
+        aria-label="Subvenciones concedidas"
+      >
+        <table class="tabla">
+          <caption>Subvenciones concedidas a Estrella del Rif</caption>
+          <thead>
+            <tr>
+              <th scope="col">Proyecto</th>
+              <th scope="col">Programa</th>
+              <th scope="col">Acción</th>
+              <th scope="col">Agencia</th>
+              <th scope="col">Convocatoria</th>
+              <th scope="col">Periodo</th>
+              <th scope="col" class="num">Importe concedido</th>
+            </tr>
+          </thead>
+          <tbody>
+            {subvenciones.map(({ proyecto, importe }) => (
+              <tr>
+                <th scope="row">
+                  <a href={`${base}/proyectos/${proyecto.slug}/`}>{proyecto.tituloCorto}</a>
+                </th>
+                <td>{proyecto.programa}</td>
+                <td>{proyecto.accion}</td>
+                <td>INJUVE (ES02)</td>
+                <td>{proyecto.convocatoria}</td>
+                <td>{proyecto.fechasLabel}</td>
+                <td class="num">{eur(importe)}</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th scope="row" colspan="6">Total concedido</th>
+              <td class="num">{eur(totalConcedido)}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <div class="desgloses">
+        {subvenciones.map(({ proyecto, importe, partidas }) => (
+          <div class="card-plana desglose fade-in">
+            <h3>{proyecto.tituloCorto}</h3>
+            <p class="desglose-accion">{proyecto.accion}</p>
+            <div class="tabla-scroll" tabindex="0" role="region" aria-label={`Desglose por partidas de ${proyecto.tituloCorto}`}>
+              <table class="tabla tabla-partidas">
+                <caption>Desglose por partidas del presupuesto aprobado</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Partida</th>
+                    <th scope="col" class="num">Importe</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {partidas.map((p) => (
+                    <tr>
+                      <th scope="row">{p.partida}</th>
+                      <td class="num">{eur(p.importe)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <th scope="row">Total</th>
+                    <td class="num">{eur(importe)}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div class="aviso fade-in">
+        <h3>Notas sobre estas cifras</h3>
+        <ul>
+          <li>
+            Son importes <strong>concedidos</strong>, no gastados. La liquidación
+            definitiva de cada subvención depende del informe final y de la actividad
+            realmente ejecutada, y puede ser inferior a lo concedido.
+          </li>
+          <li>
+            En el proyecto «{melillaIsEurope.tituloCorto}» (KA155) la agencia nacional ha
+            solicitado una <strong>garantía financiera</strong>, práctica habitual con
+            entidades que acceden por primera vez a estos fondos.
+          </li>
+          <li>
+            Los importes no aparecen en las fichas de los proyectos a propósito: la
+            información económica se concentra en esta página, donde se lee junto al resto
+            de los datos de la asociación.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-cal" aria-labelledby="documentos">
+    <div class="container-estrecho">
+      <div class="bloque-cabecera fade-in">
+        <p class="section-label">Documentación</p>
+        <h2 class="section-title" id="documentos">Documentos institucionales</h2>
+        {/* Antes se prometia enviar por correo "la version vigente" de cualquiera
+            de estos documentos. La tabla de aqui abajo los marca todos como
+            "Proximamente" precisamente porque no estan aprobados ni facilitados,
+            asi que ese envio no se puede garantizar. Se ofrece lo que si se puede
+            cumplir: preguntar por el estado de un documento y recibir respuesta. */}
+        <p class="section-subtitle">
+          Se publicarán en esta página a medida que la junta directiva los apruebe.
+          Mientras tanto, se puede escribir para preguntar por el estado de un documento
+          concreto y la asociación responde por escrito.
+        </p>
+      </div>
+
+      <div
+        class="tabla-scroll fade-in"
+        tabindex="0"
+        role="region"
+        aria-label="Documentos institucionales y su estado de publicación"
+      >
+        <table class="tabla">
+          <caption>Estado de publicación de los documentos institucionales</caption>
+          <thead>
+            <tr>
+              <th scope="col">Documento</th>
+              <th scope="col">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {documentos.map((doc) => (
+              <tr>
+                <th scope="row">{doc.nombre}</th>
+                <td>
+                  {/* El estado va como texto dentro del distintivo, no como un
+                      color: el criterio 1.4.1 de las WCAG prohibe que el color
+                      sea el unico portador de la informacion. */}
+                  <span
+                    class:list={[
+                      'badge',
+                      doc.estado === 'Disponible' ? 'badge-turquesa' : 'badge-indigo',
+                    ]}
+                  >
+                    {doc.estado}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p class="nota fade-in">
+        Para preguntar por cualquiera de estos documentos, escribe a
+        <a href={`mailto:${site.email}?subject=${asuntoDocs}`}>{site.email}</a>. Te
+        diremos en qué situación está y, si ya está aprobado, cómo consultarlo.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="ejercicio">
+    <div class="container-estrecho">
+      <div class="bloque-cabecera fade-in">
+        <p class="section-label">Ejercicio</p>
+        <h2 class="section-title" id="ejercicio">Por qué todavía no hay cuentas anuales</h2>
+      </div>
+
+      <div class="prosa fade-in">
+        <p>
+          La asociación se constituyó en {site.founded} y no ha cerrado todavía ningún
+          ejercicio con subvenciones ejecutadas. Los dos proyectos empiezan en julio y
+          agosto de 2026 y terminan en 2027, así que el primer ejercicio con actividad
+          subvencionada aún está en curso.
+        </p>
+        <p>
+          En consecuencia <strong>no hay cuentas anuales publicables</strong>. En cuanto se
+          cierre y se apruebe el primer ejercicio con ejecución, las cuentas se publicarán
+          en esta página junto al detalle del gasto de cada subvención. Hasta entonces, lo
+          único que se puede afirmar sobre el dinero es lo que figura más arriba: lo
+          concedido y su desglose por partidas.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .bloque-cabecera {
+    margin-bottom: 2.25rem;
+  }
+
+  /* ─── Datos identificativos ─── */
+  .datos {
+    display: grid;
+    gap: 0;
+    background: var(--white);
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .dato {
+    display: grid;
+    gap: 0.15rem;
+    padding: 1rem 1.4rem;
+    border-bottom: 1px solid var(--linea);
+  }
+  .dato:last-child {
+    border-bottom: none;
+  }
+  .datos dt {
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tinta-tenue);
+  }
+  .datos dd {
+    color: var(--indigo);
+    font-size: 0.98rem;
+    line-height: 1.6;
+  }
+  .datos a {
+    color: var(--terracota-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  @media (min-width: 680px) {
+    .dato {
+      grid-template-columns: 12rem minmax(0, 1fr);
+      gap: 1.5rem;
+      align-items: baseline;
+    }
+    .datos dt {
+      padding-top: 0.15rem;
+    }
+  }
+
+  /* ─── Junta directiva ─── */
+  .junta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.25rem;
+  }
+  .junta li {
+    padding: 1.4rem 1.5rem;
+  }
+  .junta-cargo {
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--terracota-texto);
+    margin-bottom: 0.3rem;
+  }
+  .junta-nombre {
+    font-family: 'Playfair Display Variable', 'Playfair Display',
+      'Playfair Display Fallback', Georgia, serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--indigo);
+    line-height: 1.3;
+  }
+
+  /* ─── Tablas ─── */
+  .tabla-scroll {
+    overflow-x: auto;
+    background: var(--white);
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-lg);
+  }
+  .tabla {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    min-width: 640px;
+  }
+  .tabla-partidas {
+    min-width: 320px;
+  }
+  .tabla caption {
+    text-align: left;
+    padding: 1rem 1.25rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--tinta-tenue);
+  }
+  .tabla thead th {
+    text-align: left;
+    padding: 0.7rem 1.25rem;
+    font-family: 'DM Sans Variable', 'DM Sans', 'DM Sans Fallback', sans-serif;
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tinta-tenue);
+    background: var(--cal);
+    border-top: 1px solid var(--linea);
+    border-bottom: 1px solid var(--linea);
+    white-space: nowrap;
+  }
+  .tabla tbody th,
+  .tabla tfoot th {
+    text-align: left;
+    font-family: 'DM Sans Variable', 'DM Sans', 'DM Sans Fallback', sans-serif;
+    font-weight: 600;
+    color: var(--indigo);
+  }
+  .tabla th,
+  .tabla td {
+    padding: 0.85rem 1.25rem;
+    vertical-align: top;
+  }
+  .tabla tbody td {
+    color: var(--tinta-suave);
+  }
+  .tabla tbody tr + tr th,
+  .tabla tbody tr + tr td {
+    border-top: 1px solid var(--linea);
+  }
+  .tabla tbody a {
+    color: var(--terracota-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .tabla tfoot tr th,
+  .tabla tfoot tr td {
+    border-top: 2px solid var(--linea);
+    background: var(--cal);
+    color: var(--indigo);
+    font-weight: 600;
+  }
+  /* Cifras alineadas a la derecha y con tabular-nums para que las columnas de
+     importes se lean como una columna y no como una escalera. */
+  .tabla .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .desgloses {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+    margin: 1.75rem 0;
+  }
+  .desglose {
+    padding: 1.5rem;
+  }
+  .desglose h3 {
+    font-size: 1.15rem;
+    color: var(--indigo);
+  }
+  .desglose-accion {
+    font-size: 0.8rem;
+    color: var(--tinta-tenue);
+    margin: 0.2rem 0 1rem;
+  }
+  .desglose .tabla-scroll {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+  }
+  .desglose .tabla caption {
+    padding-left: 0;
+    padding-top: 0;
+  }
+  .desglose .tabla th,
+  .desglose .tabla td {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .desglose .tabla thead th,
+  .desglose .tabla tfoot th,
+  .desglose .tabla tfoot td {
+    background: transparent;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  /* ─── Avisos y notas ─── */
+  .aviso {
+    background: var(--white);
+    border: 1px solid var(--linea);
+    border-left: 3px solid var(--oro);
+    border-radius: var(--radius-md);
+    padding: 1.5rem 1.75rem;
+    box-shadow: var(--shadow-sm);
+  }
+  .aviso h3 {
+    font-size: 1.1rem;
+    color: var(--indigo);
+    margin-bottom: 0.75rem;
+  }
+  .aviso ul {
+    display: grid;
+    gap: 0.65rem;
+  }
+  .aviso li {
+    position: relative;
+    padding-left: 1.35rem;
+    color: var(--tinta-suave);
+    font-size: 0.95rem;
+  }
+  .aviso li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.62em;
+    width: 0.45rem;
+    height: 0.45rem;
+    background: var(--oro);
+    border-radius: 50%;
+  }
+  .aviso strong {
+    color: var(--indigo);
+    font-weight: 600;
+  }
+
+  .nota {
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+    color: var(--tinta-suave);
+    line-height: 1.65;
+  }
+  .nota a {
+    color: var(--terracota-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

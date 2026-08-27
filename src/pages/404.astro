@@ -1,0 +1,130 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site, navLinks } from '../data/site';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Atajos a las secciones reales del sitio. Se derivan de navLinks para que una
+// pagina nueva en la navegacion aparezca aqui sin tocar este fichero; se quita
+// «Inicio» porque ya tiene su propio boton destacado arriba.
+const atajos = navLinks.filter((enlace) => enlace.href !== '/');
+---
+
+<BaseLayout
+  title="Página no encontrada"
+  description="La página que buscas no existe o ha cambiado de dirección."
+  noindex
+>
+  <section class="nf" aria-labelledby="nf-titulo">
+    <div class="container nf-inner">
+      <img
+        class="nf-logo"
+        src={`${base}/images/logo-claro.svg`}
+        alt=""
+        width="56"
+        height="56"
+        aria-hidden="true"
+      />
+
+      <p class="nf-codigo">Error 404</p>
+      <h1 id="nf-titulo">Esta página no existe</h1>
+      <p class="nf-texto">
+        La dirección que has seguido no corresponde a ninguna página de
+        {site.name}, o el contenido ha cambiado de sitio. Desde aquí puedes
+        seguir a cualquier sección.
+      </p>
+
+      <div class="nf-acciones">
+        <a href={`${base}/`} class="btn btn-oro btn-lg">Ir al inicio</a>
+        <a href={`${base}/contacto/`} class="btn btn-outline-white btn-lg">Escribirnos</a>
+      </div>
+
+      <nav class="nf-nav" aria-label="Secciones del sitio">
+        <ul>
+          {atajos.map((enlace) => (
+            <li>
+              <a href={`${base}${enlace.href}`}>{enlace.label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .nf {
+    background: var(--indigo);
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+    padding: 9rem 0 5rem;
+  }
+
+  .nf-inner {
+    max-width: 640px;
+  }
+
+  .nf-logo {
+    display: block;
+    margin-bottom: 2rem;
+  }
+
+  .nf-codigo {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--oro);
+    margin-bottom: 0.75rem;
+  }
+
+  .nf h1 {
+    color: #fff;
+    font-size: clamp(1.9rem, 4vw, 2.75rem);
+    margin-bottom: 1.1rem;
+  }
+
+  .nf-texto {
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 1.05rem;
+    line-height: 1.75;
+    margin-bottom: 2.25rem;
+  }
+
+  .nf-acciones {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .nf-nav {
+    margin-top: 3rem;
+    padding-top: 1.75rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+  }
+  .nf-nav ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.75rem;
+    list-style: none;
+  }
+  .nf-nav a {
+    font-size: 0.92rem;
+    color: rgba(255, 255, 255, 0.72);
+    text-decoration: none;
+  }
+  .nf-nav a:hover,
+  .nf-nav a:focus-visible {
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+
+  @media (max-width: 640px) {
+    .nf {
+      padding: 7.5rem 0 4rem;
+      min-height: 0;
+    }
+  }
+</style>

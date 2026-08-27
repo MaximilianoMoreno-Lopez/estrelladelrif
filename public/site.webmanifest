@@ -1,0 +1,14 @@
+{
+  "name": "Estrella del Rif",
+  "short_name": "Estrella del Rif",
+  "description": "Asociación juvenil de Melilla. Educación no formal, participación democrática, inclusión y oportunidades europeas para la juventud de la ciudad.",
+  "icons": [
+    { "src": "/favicon-192x192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/favicon-512x512.png", "type": "image/png", "sizes": "512x512" }
+  ],
+  "theme_color": "#14263f",
+  "background_color": "#14263f",
+  "display": "standalone",
+  "start_url": "/",
+  "lang": "es"
+}

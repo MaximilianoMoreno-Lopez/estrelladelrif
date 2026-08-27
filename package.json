@@ -1,0 +1,25 @@
+{
+  "name": "estrella-del-rif",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "node scripts/generate-webp.mjs && astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "webp": "node scripts/generate-webp.mjs",
+    "marca": "node scripts/generate-brand.mjs"
+  },
+  "dependencies": {
+    "@astrojs/rss": "^4.0.18",
+    "@astrojs/sitemap": "^3.2.1",
+    "@fontsource-variable/dm-sans": "^5.2.8",
+    "@fontsource-variable/playfair-display": "^5.2.8",
+    "astro": "^6.1.9"
+  },
+  "devDependencies": {
+    "sharp": "^0.34.5"
+  }
+}

@@ -1,0 +1,31 @@
+<!--
+  Marca de Estrella del Rif: arco de herradura que enmarca una estrella de ocho
+  puntas. El arco es la puerta mediterranea de Melilla y la estrella el motivo
+  geometrico compartido por el Mediterraneo y el Rif.
+
+  Geometria, porque sin ella la marca no se puede reeditar:
+
+  - Arco: circunferencia de centro (32, 25.5) y radio 15.5. El trazo arranca a
+    145 y 35 grados, es decir POR DEBAJO del diametro horizontal. Ahi esta la
+    firma del arco de herradura: la circunferencia sigue mas alla de su punto
+    mas ancho (x = 16.5 y x = 47.5) mientras las jambas bajan desde x = 19.3 y
+    x = 44.7, asi que el arco es mas ancho que el vano. Un primer intento arranco
+    a 160 y 20 grados y el resultado leia como un tunel de medio punto, no como
+    una herradura.
+  - Estrella: octagrama exacto de dos cuadrados girados 45 grados, centro
+    (32, 28.5), radio exterior 9.4 y radio interior 9.4 x 0.76537, que es donde se
+    cruzan las aristas de los dos cuadrados. Ancho resultante 22.6 a 41.4, justo
+    dentro del vano (21.4 a 42.6).
+  - Zocalo de terracota abajo: barra continua, no dos apoyos. Con dos segmentos
+    partidos parecian dos patines colgando de las jambas.
+
+  Colores literales y no variables CSS: este fichero se carga con <img> y a
+  traves de <img> una hoja de estilos externa no lo alcanza.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Estrella del Rif">
+  <path d="M19.3 50 L19.3 34.39 A15.5 15.5 0 1 1 44.7 34.39 L44.7 50"
+        fill="none" stroke="#f8f5ef" stroke-width="4.2" stroke-linecap="round"/>
+  <path d="M16.5 52.6 L47.5 52.6"
+        fill="none" stroke="#c0563a" stroke-width="4" stroke-linecap="round"/>
+  <polygon fill="#e0a428" points="32,19.1 34.75,21.85 38.65,21.85 38.65,25.75 41.4,28.5 38.65,31.25 38.65,35.15 34.75,35.15 32,37.9 29.25,35.15 25.35,35.15 25.35,31.25 22.6,28.5 25.35,25.75 25.35,21.85 29.25,21.85"/>
+</svg>

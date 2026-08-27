@@ -1,0 +1,241 @@
+---
+import '@fontsource-variable/dm-sans';
+import '@fontsource-variable/playfair-display';
+import '../styles/global.css';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import { site } from '../data/site';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  ogTitle?: string;
+  ogType?: 'website' | 'article';
+  publishedTime?: string;
+  jsonLd?: object | object[];
+  breadcrumbs?: { name: string; url: string }[];
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = site.description,
+  ogImage = site.ogImage,
+  ogTitle,
+  ogType = 'website',
+  publishedTime,
+  jsonLd,
+  breadcrumbs,
+  noindex = false,
+} = Astro.props;
+
+// El titular de la portada no se prefija con el nombre de la asociacion; el
+// resto de paginas si, para que la pestana identifique el sitio.
+const esPortada = title === site.name;
+const pageTitle = esPortada
+  ? `${site.name} | Asociación juvenil de Melilla · Erasmus+`
+  : `${title} | ${site.name}`;
+const socialTitle = ogTitle ?? (esPortada ? site.name : pageTitle);
+
+const siteOrigin = Astro.site ?? new URL(site.url);
+const canonicalURL = new URL(Astro.url.pathname, siteOrigin);
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const ogImageURL = new URL(`${base}${ogImage}`, siteOrigin).href;
+
+const breadcrumbJsonLd =
+  breadcrumbs && breadcrumbs.length > 0
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: breadcrumbs.map((b, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          name: b.name,
+          // Con `base` por delante, igual que las migas visibles. Sin el, al
+          // construir para el subdirectorio de GitHub Pages el dato estructurado
+          // apuntaria a URL que no existen.
+          item: new URL(`${base}${b.url}`, siteOrigin).href,
+        })),
+      }
+    : null;
+
+// Nodo canonico de identidad de la organizacion. Va con @id fijo para que el
+// resto de nodos (WebSite, Article, Course) lo referencien en vez de repetir los
+// datos, y para que buscadores y modelos de lenguaje resuelvan una sola entidad.
+const orgNode = {
+  '@context': 'https://schema.org',
+  '@type': 'NGO',
+  '@id': `${site.url}/#org`,
+  name: site.name,
+  legalName: site.legalName,
+  alternateName: site.acronym,
+  url: `${site.url}/`,
+  logo: `${site.url}/favicon-512x512.png`,
+  image: `${site.url}${site.ogImage}`,
+  email: site.email,
+  telephone: site.phoneHref,
+  taxID: site.nif,
+  foundingDate: String(site.founded),
+  // Sin `nonprofitStatus`: la enumeracion NonprofitType de schema.org solo tiene
+  // valores de Paises Bajos, Reino Unido y Estados Unidos, ninguno equivalente a
+  // una asociacion espanola sin animo de lucro. Poner uno ajeno seria declarar
+  // una figura juridica falsa.
+  description: site.description,
+  address: {
+    '@type': 'PostalAddress',
+    streetAddress: site.address.street,
+    postalCode: site.address.postalCode,
+    addressLocality: site.address.city,
+    addressRegion: site.address.region,
+    addressCountry: site.address.country,
+  },
+  areaServed: { '@type': 'AdministrativeArea', name: 'Melilla' },
+  knowsAbout: [
+    'Educación no formal',
+    'Participación juvenil',
+    'Erasmus+',
+    'DiscoverEU',
+    'Diálogo intercultural',
+    'Inclusión de personas con discapacidad',
+    'Alfabetización mediática',
+  ],
+  identifier: [
+    { '@type': 'PropertyValue', name: 'NIF', value: site.nif },
+    { '@type': 'PropertyValue', name: 'OID Erasmus+', value: site.oid },
+  ],
+  ...(site.socials.length > 0 ? { sameAs: site.socials.map((r) => r.url) } : {}),
+};
+
+const websiteNode = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  '@id': `${site.url}/#website`,
+  url: `${site.url}/`,
+  name: site.name,
+  publisher: { '@id': `${site.url}/#org` },
+  inLanguage: 'es-ES',
+};
+
+const jsonLdEntries: object[] = [];
+if (Array.isArray(jsonLd)) jsonLdEntries.push(...jsonLd);
+else if (jsonLd) jsonLdEntries.push(jsonLd);
+if (breadcrumbJsonLd) jsonLdEntries.push(breadcrumbJsonLd);
+if (!noindex) jsonLdEntries.unshift(orgNode, websiteNode);
+
+// Migas visibles. Google documenta que el dato estructurado BreadcrumbList debe
+// reflejar unas migas que la persona pueda ver, asi que la misma prop alimenta el
+// JSON-LD y la barra de navegacion. Con un solo nivel no se pinta nada: unas
+// migas que solo dicen "Inicio" no orientan a nadie.
+const hayMigas = Boolean(breadcrumbs && breadcrumbs.length > 1);
+
+const robotsContent = noindex
+  ? 'noindex, nofollow'
+  : 'index, follow, max-snippet:-1, max-image-preview:large';
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content={site.themeColor} />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={socialTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content="es_ES" />
+    {ogType === 'article' && publishedTime && (
+      <meta property="article:published_time" content={publishedTime} />
+    )}
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={socialTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageURL} />
+
+    <meta name="robots" content={robotsContent} />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={`${site.name} · Actualidad`}
+      href={`${base}/rss.xml`}
+    />
+
+    {/* Sin JavaScript el IntersectionObserver no llega a ejecutarse, asi que se
+        revela todo. El CSS pasa por set:html a proposito: un elemento <style>
+        anidado dentro de <noscript> hace que el compilador de Astro cierre el
+        <head> antes de tiempo y expulse de ahi el JSON-LD y los favicons. */}
+    <noscript
+      set:html={`<style>.fade-in{opacity:1 !important;transform:none !important;}</style>`}
+    ></noscript>
+
+    {jsonLdEntries.map((entry) => (
+      <script is:inline type="application/ld+json" set:html={JSON.stringify(entry)} />
+    ))}
+
+    <link rel="icon" type="image/svg+xml" href={`${base}/favicon.svg`} />
+    <link rel="icon" type="image/png" sizes="16x16" href={`${base}/favicon-16x16.png`} />
+    <link rel="icon" type="image/png" sizes="32x32" href={`${base}/favicon-32x32.png`} />
+    <link rel="icon" type="image/png" sizes="48x48" href={`${base}/favicon-48x48.png`} />
+    <link rel="icon" type="image/png" sizes="96x96" href={`${base}/favicon-96x96.png`} />
+    <link rel="icon" type="image/png" sizes="192x192" href={`${base}/favicon-192x192.png`} />
+    <link rel="icon" type="image/png" sizes="512x512" href={`${base}/favicon-512x512.png`} />
+    <link rel="apple-touch-icon" sizes="180x180" href={`${base}/apple-touch-icon.png`} />
+    <link rel="shortcut icon" href={`${base}/favicon.ico`} />
+    <link rel="manifest" href={`${base}/site.webmanifest`} />
+  </head>
+  <body>
+    <a href="#main" class="skip-link">Saltar al contenido</a>
+    <Navbar />
+    <main id="main" class:list={{ 'con-migas': hayMigas }}>
+      {hayMigas && (
+        <nav class="migas" aria-label="Migas de pan">
+          <div class="container">
+            <ol>
+              {breadcrumbs!.map((miga, i) =>
+                i < breadcrumbs!.length - 1 ? (
+                  <li><a href={`${base}${miga.url}`}>{miga.name}</a></li>
+                ) : (
+                  <li><span aria-current="page">{miga.name}</span></li>
+                ),
+              )}
+            </ol>
+          </div>
+        </nav>
+      )}
+      <slot />
+    </main>
+    <Footer />
+
+    <script>
+      // Revelado al hacer scroll. Se ejecuta una sola vez por elemento y se
+      // desconecta, para no dejar un observador vivo en paginas largas.
+      const observador = new IntersectionObserver(
+        (entradas) => {
+          for (const entrada of entradas) {
+            if (!entrada.isIntersecting) continue;
+            entrada.target.classList.add('visible');
+            observador.unobserve(entrada.target);
+          }
+        },
+        { threshold: 0.12, rootMargin: '0px 0px -40px 0px' },
+      );
+
+      // Los heroes se animan solos por CSS para no depender de este script en el
+      // primer pintado, asi que se excluyen del observador.
+      document
+        .querySelectorAll('.fade-in:not(.hero .fade-in):not(.page-hero .fade-in)')
+        .forEach((el) => observador.observe(el));
+    </script>
+  </body>
+</html>

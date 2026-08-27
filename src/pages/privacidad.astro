@@ -1,0 +1,244 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
+import { LEGAL_VERSION, LEGAL_VERSION_LABEL } from '../lib/legal.js';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const correo = `<a href="mailto:${site.email}">${site.email}</a>`;
+const sede = `${site.address.street}, ${site.address.postalCode} ${site.address.city} (España)`;
+
+// El texto va como array de secciones y no como HTML suelto por dos razones.
+// La primera es de mantenimiento: LEGAL.md obliga a subir LEGAL_VERSION en el
+// mismo commit que cualquier cambio de redaccion, y con el contenido aislado en
+// una estructura de datos el diff del commit ensena exactamente que parrafo
+// cambio; con el texto entretejido en el marcado, cada retoque de maquetacion
+// contamina el diff legal. La segunda es que asi la numeracion y el marcado
+// salen homogeneos en las tres paginas legales sin repetir plantilla.
+//
+// Cada `p` es HTML porque los parrafos legales necesitan enlaces y negritas
+// dentro de la frase; se inyectan con set:html mas abajo. Todo lo que se
+// interpola procede de src/data/site.ts o es literal escrito a mano, nunca de
+// entrada de usuario, asi que no hay superficie de inyeccion.
+//
+// Los elementos del array que empiezan por <ul se envuelven en un <div> y no en
+// un <p>: una lista dentro de un parrafo es marcado invalido y el navegador la
+// expulsa del <p>, con lo que el arbol del DOM deja de parecerse al que escribe
+// el codigo. La utilidad `esLista` decide el contenedor.
+const secciones = [
+  {
+    h: '1. Responsable del tratamiento',
+    p: [
+      `El responsable del tratamiento de los datos personales a los que se refiere esta política es la asociación <strong>${site.legalName}</strong>, con NIF ${site.nif} y domicilio en ${sede}.`,
+      `Para cualquier cuestión relativa a protección de datos puedes escribir a ${correo}. La asociación no está obligada a designar delegado de protección de datos y no lo ha designado.`,
+    ],
+  },
+  {
+    h: '2. Qué hace y qué no hace este sitio web',
+    p: [
+      'Conviene decirlo antes que nada, porque condiciona todo lo demás: este sitio web es <strong>estático</strong>. Las páginas se generan al publicar y se sirven ya construidas, sin base de datos y sin código propio que se ejecute en un servidor cuando las visitas.',
+      'En consecuencia, este sitio web:',
+      '<ul>' +
+        '<li><strong>no instala cookies propias</strong> ni ningún otro identificador en tu navegador;</li>' +
+        '<li><strong>no tiene analítica web</strong> ni herramientas de medición de audiencia, ni propias ni de terceros;</li>' +
+        '<li><strong>no incorpora formularios</strong> de contacto, de suscripción ni de inscripción;</li>' +
+        '<li><strong>no permite registrarse</strong> ni crear cuentas de usuario;</li>' +
+        '<li><strong>no carga recursos de terceros</strong>: las tipografías, las imágenes y los estilos se sirven desde el propio dominio, sin peticiones a servicios externos.</li>' +
+      '</ul>',
+      'Por eso, navegar por estas páginas no supone que la asociación recoja ningún dato personal tuyo. Los únicos datos personales que trata la asociación son los que las personas nos envían voluntariamente por correo electrónico.',
+    ],
+  },
+  {
+    h: '3. Alojamiento y registros del servidor',
+    p: [
+      'El sitio se aloja en <strong>GitHub Pages</strong>, servicio de GitHub, Inc. Como cualquier servidor web, la infraestructura de GitHub registra en sus propios ficheros de actividad datos técnicos de las peticiones que recibe, entre ellos la <strong>dirección IP</strong> del visitante, la fecha y la hora, la página solicitada y el agente de usuario. Ese registro lo realiza GitHub como proveedor de alojamiento, para operar y proteger el servicio.',
+      'La asociación no accede a esos registros, no los descarga y no los utiliza para elaborar estadísticas ni perfiles. Puedes consultar el tratamiento que GitHub hace de esa información en su <a href="https://docs.github.com/es/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">declaración de privacidad general<span class="visually-hidden"> (se abre en una ventana nueva)</span></a> y en su <a href="https://docs.github.com/es/site-policy/privacy-policies/github-privacy-statement" target="_blank" rel="noopener">declaración de privacidad de los servicios<span class="visually-hidden"> (se abre en una ventana nueva)</span></a>, que incluye el apartado dedicado a GitHub Pages.',
+    ],
+  },
+  {
+    h: '4. Datos que tratamos y de dónde salen',
+    p: [
+      'Tratamos únicamente los datos personales que nos facilitas cuando te pones en contacto con la asociación por correo electrónico: tu <strong>nombre</strong>, tu <strong>dirección de correo</strong> y el <strong>contenido del mensaje</strong>, con los datos que decidas incluir en él (por ejemplo un teléfono, tu edad o la entidad a la que perteneces).',
+      'No recabamos datos por otras vías desde este sitio web y no compramos ni alquilamos bases de datos. Te pedimos que no incluyas en tus mensajes datos de categorías especiales —salud, origen étnico, convicciones, orientación sexual u otros— que no sean estrictamente necesarios para atender tu solicitud.',
+    ],
+  },
+  {
+    h: '5. Para qué usamos esos datos',
+    p: [
+      'Las finalidades son las que se derivan del propio mensaje que nos envías:',
+      '<ul>' +
+        '<li>responder a consultas, peticiones de información y solicitudes de prensa;</li>' +
+        '<li>gestionar candidaturas de personas jóvenes a las actividades y a los proyectos de la asociación, y comunicarnos con quienes participan en ellos;</li>' +
+        '<li>tramitar solicitudes de voluntariado y de alta como socia o socio;</li>' +
+        '<li>mantener la relación con entidades socias, centros educativos, administraciones y otras organizaciones;</li>' +
+        '<li>cumplir las obligaciones de justificación, seguimiento y auditoría que imponen los programas de financiación pública en los que participa la asociación.</li>' +
+      '</ul>',
+      'No tomamos decisiones automatizadas ni elaboramos perfiles con tus datos, y no los usamos para enviarte comunicaciones comerciales.',
+    ],
+  },
+  {
+    h: '6. Base jurídica del tratamiento',
+    p: [
+      'Según el caso, el tratamiento se apoya en una de estas bases del artículo 6 del RGPD:',
+      '<ul>' +
+        '<li><strong>Tu consentimiento</strong> (art. 6.1.a), que prestas de forma inequívoca al dirigirte a nosotros y facilitarnos tus datos, y que puedes retirar en cualquier momento sin que ello afecte a la licitud del tratamiento anterior.</li>' +
+        '<li>La <strong>ejecución de una relación</strong> o de las medidas previas a ella (art. 6.1.b) cuando participas en una actividad, te haces socia o socio, o colaboras como voluntaria o voluntario.</li>' +
+        '<li>El <strong>interés legítimo</strong> de la asociación (art. 6.1.f) en atender las comunicaciones que recibe, mantener la relación con sus entidades socias y conservar la trazabilidad de sus proyectos. Ese interés se ha ponderado frente a tus derechos y no implica un uso de los datos distinto del que cabe esperar al escribirnos.</li>' +
+        '<li>El <strong>cumplimiento de obligaciones legales</strong> (art. 6.1.c) en materia contable, fiscal, de derecho de asociación y de justificación de subvenciones públicas.</li>' +
+      '</ul>',
+    ],
+  },
+  {
+    h: '7. Cuánto tiempo los conservamos',
+    p: [
+      'Conservamos los datos el tiempo necesario para la finalidad que justificó recogerlos:',
+      '<ul>' +
+        '<li>los mensajes de consulta, mientras dure la conversación y hasta un año después, para poder retomarla y acreditar la respuesta;</li>' +
+        '<li>los datos de participantes en actividades y de personas voluntarias, mientras dure la participación y, después, durante los plazos de conservación y control que exija el programa que financia la actividad;</li>' +
+        '<li>los datos con relevancia contable, fiscal o de justificación de subvenciones, durante los plazos de prescripción que fije la normativa aplicable;</li>' +
+        '<li>los datos de personas asociadas, mientras se mantenga esa condición y después durante el plazo legal de conservación de los libros de la asociación.</li>' +
+      '</ul>',
+      'Cuando dejan de ser necesarios se suprimen o se bloquean, según corresponda, y se eliminan de forma segura.',
+    ],
+  },
+  {
+    h: '8. Destinatarios',
+    p: [
+      'No cedemos ni comunicamos tus datos a terceros, salvo obligación legal. En particular, no los vendemos, no los cruzamos con bases de datos ajenas y no los enviamos a plataformas publicitarias.',
+      'Solo pueden acceder a ellos, por obligación legal, las administraciones públicas competentes, los organismos de control de los programas europeos —la Agencia Nacional Española de la Juventud (INJUVE) y la Comisión Europea— cuando ejercen sus funciones de seguimiento, verificación y auditoría, y los juzgados y tribunales que lo requieran.',
+      'El buzón de la asociación se gestiona con un proveedor de servicios de correo electrónico, que actúa como encargado del tratamiento y que puede implicar transferencias internacionales de datos amparadas en las garantías del capítulo V del RGPD. No hay otros encargados con acceso a los datos.',
+      'Este sitio web no incorpora botones de redes sociales ni contenidos incrustados de plataformas externas, de modo que la simple visita no comunica nada de ti a esas plataformas.',
+    ],
+  },
+  {
+    h: '9. Tus derechos',
+    p: [
+      'Puedes ejercer en cualquier momento y de forma gratuita tus derechos de <strong>acceso, rectificación, supresión, oposición, limitación del tratamiento y portabilidad</strong>, así como retirar el consentimiento que hubieras prestado.',
+      `Para ejercerlos basta con escribir a ${correo} indicando el derecho que quieres ejercer y, si tu identidad no resulta evidente del propio correo, algún dato que nos permita verificarla. Responderemos en el plazo de un mes desde la recepción de la solicitud, prorrogable en los términos del artículo 12 del RGPD.`,
+      `También puedes dirigir la solicitud por escrito a ${sede}.`,
+    ],
+  },
+  {
+    h: '10. Reclamación ante la autoridad de control',
+    p: [
+      'Si consideras que el tratamiento de tus datos no se ajusta a la normativa, o no estás conforme con la respuesta que te hemos dado, puedes presentar una reclamación ante la <strong>Agencia Española de Protección de Datos</strong> (calle Jorge Juan, 6, 28001 Madrid), a través de su sede electrónica en <a href="https://www.aepd.es" target="_blank" rel="noopener">www.aepd.es<span class="visually-hidden"> (se abre en una ventana nueva)</span></a>. Presentar la reclamación es gratuito y no exige haberse dirigido antes a la asociación, aunque agradecemos la oportunidad de resolverlo.',
+    ],
+  },
+  {
+    h: '11. Cambios en esta política',
+    p: [
+      'Podemos actualizar esta política para adaptarla a cambios normativos o a cambios en la actividad de la asociación. La versión vigente es siempre la publicada en esta página, identificada por la versión y la fecha que figuran al principio del texto.',
+    ],
+  },
+  {
+    h: '12. Normativa aplicable',
+    p: [
+      'Esta política se rige por el <strong>Reglamento (UE) 2016/679</strong> del Parlamento Europeo y del Consejo, de 27 de abril de 2016, relativo a la protección de las personas físicas en lo que respecta al tratamiento de datos personales (RGPD), y por la <strong>Ley Orgánica 3/2018</strong>, de 5 de diciembre, de Protección de Datos Personales y garantía de los derechos digitales (LOPDGDD).',
+    ],
+  },
+];
+
+const esLista = (html: string) => html.startsWith('<ul');
+
+// Los tres enlaces con target="_blank" del texto llevan detras un aviso oculto
+// «(se abre en una ventana nueva)». Abrir una ventana sin avisar es un cambio de
+// contexto inesperado, y /contacto/ ya lo avisaba asi: sin esto el mismo sitio
+// se comportaba de dos maneras distintas. El aviso va DENTRO del <a> para que
+// forme parte del nombre accesible del enlace, no suelto detras de el.
+---
+
+<BaseLayout
+  title="Política de privacidad"
+  description={`Política de privacidad de ${site.name}: qué datos trata la asociación, con qué base jurídica y cómo ejercer tus derechos. Este sitio web no usa cookies ni analítica.`}
+  breadcrumbs={[
+    { name: 'Inicio', url: '/' },
+    { name: 'Política de privacidad', url: '/privacidad/' },
+  ]}
+>
+  <div class="page-hero">
+    <div class="container page-hero-content">
+      <span class="badge badge-white fade-in">Protección de datos</span>
+      <h1 class="fade-in fade-in-delay-1">Política de privacidad</h1>
+      <p class="fade-in fade-in-delay-2">
+        Cómo trata {site.name} los datos personales, conforme al RGPD y a la LOPDGDD.
+        Este sitio web no usa cookies propias ni analítica.
+      </p>
+    </div>
+  </div>
+
+  <section class="section" aria-label="Texto de la política de privacidad">
+    <div class="container-estrecho">
+      <p class="legal-vigencia fade-in">
+        Versión {LEGAL_VERSION} · en vigor desde el {LEGAL_VERSION_LABEL}.
+      </p>
+
+      <div class="prosa legal-cuerpo fade-in">
+        {secciones.map((s) => (
+          <div class="legal-bloque">
+            <h2>{s.h}</h2>
+            {s.p.map((parrafo) =>
+              esLista(parrafo) ? <div class="legal-lista" set:html={parrafo} /> : <p set:html={parrafo} />,
+            )}
+          </div>
+        ))}
+      </div>
+
+      <p class="legal-pie fade-in">
+        Consulta también los <a href={`${base}/terminos/`}>términos de uso</a> y la
+        <a href={`${base}/accesibilidad/`}>declaración de accesibilidad</a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .legal-vigencia {
+    font-size: 0.85rem;
+    color: var(--tinta-tenue);
+    padding-bottom: 1.25rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--linea);
+  }
+
+  /* El primer h2 pierde el margen superior de .prosa h2: ya viene separado por
+     el filete de la linea de vigencia. */
+  .legal-bloque:first-child h2 {
+    margin-top: 0;
+  }
+
+  /* Los parrafos que solo contienen un <ul> se pegan al parrafo que los
+     introduce; sin este ajuste quedaba un hueco doble entre la frase de entrada
+     y la lista. */
+  .legal-lista :global(ul) {
+    margin-top: -0.35rem;
+  }
+
+  /* El texto legal se inyecta con set:html, y ese marcado no recibe el atributo
+     de ambito de Astro: una regla `.visually-hidden` normal no llegaria a los
+     avisos de ventana nueva. Por eso va con :global acotado a .legal-cuerpo, que
+     si es un elemento de esta plantilla. No se usa display:none porque eso
+     esconderia el aviso tambien de los lectores de pantalla, que es a quien va
+     dirigido. */
+  .legal-cuerpo :global(.visually-hidden) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .legal-pie {
+    margin-top: 3rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--linea);
+    font-size: 0.85rem;
+    color: var(--tinta-tenue);
+    line-height: 1.7;
+  }
+  .legal-pie a {
+    color: var(--terracota-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

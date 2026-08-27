@@ -1,0 +1,262 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EUBanner from '../../components/EUBanner.astro';
+import Picture from '../../components/Picture.astro';
+import { site } from '../../data/site';
+import { etiquetaTipo as etiquetaDeTipo } from '../../lib/noticias';
+
+export async function getStaticPaths() {
+  const noticias = await getCollection('noticias');
+  // Astro 6 (Content Layer) identifica las entradas por `entry.id`, no por
+  // `entry.slug`: la propiedad `slug` de la API antigua ya no existe y usarla
+  // devolveria undefined y generaria rutas /actualidad/undefined/.
+  return noticias.map((noticia) => ({
+    params: { slug: noticia.id },
+    props: { noticia },
+  }));
+}
+
+const { noticia } = Astro.props;
+const { Content } = await render(noticia);
+const { title, type, date, dates, location, description, cover } = noticia.data;
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const ruta = `/actualidad/${noticia.id}/`;
+
+// El distintivo del hero va siempre en badge-white: el hero es oscuro y las
+// variantes de color de la paleta no llegan a contraste suficiente sobre el.
+// Por eso aqui solo se usa la etiqueta del tipo y no su color, al contrario que
+// en el listado. La tabla de etiquetas vive en src/lib/noticias.ts para que la
+// portada, el listado y esta pagina no guarden tres copias que se desincronicen.
+const etiquetaTipo = etiquetaDeTipo(type);
+
+// La banda de cofinanciacion solo aparece cuando la noticia habla de un proyecto
+// financiado por la Union. Una nota institucional (constitucion, memoria, cambio
+// de sede) no lleva banda: declarar cofinanciacion europea de la asociacion
+// entera, y no del proyecto concreto, seria inexacto y ademas incumpliria las
+// normas de uso del emblema.
+const esProyectoEuropeo = type === 'Erasmus+' || type === 'DiscoverEU';
+const programasEU = type === 'DiscoverEU' ? 'Erasmus+ Juventud · DiscoverEU' : 'Erasmus+ Juventud';
+
+const MESES = [
+  'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+  'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre',
+];
+
+function fechaLarga(fecha: string): string {
+  const [anio, mes, dia] = fecha.split('-');
+  if (!mes) return anio;
+  const nombreMes = MESES[Number(mes) - 1] ?? '';
+  if (!dia) return `${nombreMes} de ${anio}`;
+  return `${Number(dia)} de ${nombreMes} de ${anio}`;
+}
+
+// article:published_time y datePublished necesitan una fecha completa. Cuando el
+// frontmatter solo trae "YYYY-MM" se completa con el dia 1 para el metadato
+// legible por maquinas, mientras que el texto visible sigue diciendo solo el mes:
+// asi no se afirma en pantalla un dia que no consta en la fuente.
+const fechaISO = /^\d{4}-\d{2}$/.test(date) ? `${date}-01` : date;
+
+const descripcion = description ?? `${title}. Actualidad de ${site.name}.`;
+
+// El BaseLayout anade « | Estrella del Rif» a todo titulo que no sea el de la
+// portada. Cuando el titular de la noticia ya nombra a la asociacion —cosa
+// natural al redactar un titular— el nombre acaba dos veces en el <title>, que
+// ademas se pasa de los caracteres que un buscador muestra antes de truncar.
+// Aqui se recorta esa mencion final solo para el titulo de pestana: el sufijo
+// del layout ya identifica el sitio. El og:title, en cambio, conserva el titular
+// entero, porque una tarjeta de red social se lee suelta y ahi si conviene que
+// diga de quien es la noticia.
+//
+// La alternativa era arreglarlo en el frontmatter de cada noticia, pero eso
+// depende de que quien redacte se acuerde; resuelto en la plantilla vale para
+// todas las noticias, las de hoy y las de maniana.
+// Se recorta comparando cadenas y no con una expresion regular: el nombre de la
+// asociacion es texto literal que viene de site.ts y construir una regex con el
+// obligaria a escaparlo sin ganar nada.
+const SUFIJOS_DEL_NOMBRE = [
+  ` de ${site.name}`,
+  ` | ${site.name}`,
+  ` · ${site.name}`,
+  ` — ${site.name}`,
+  ` – ${site.name}`,
+  ` - ${site.name}`,
+];
+
+function recortarNombre(titular: string): string {
+  const limpio = titular.trim();
+  for (const sufijo of SUFIJOS_DEL_NOMBRE) {
+    if (limpio.toLowerCase().endsWith(sufijo.toLowerCase())) {
+      // Si al quitar el sufijo no queda nada es que el titular era solo el
+      // nombre de la asociacion: se deja tal cual, porque un <title> vacio es
+      // peor que un nombre repetido.
+      return limpio.slice(0, -sufijo.length).trim() || limpio;
+    }
+  }
+  return limpio;
+}
+
+const tituloPestana = recortarNombre(title);
+
+const articleJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  description: descripcion,
+  inLanguage: 'es-ES',
+  datePublished: fechaISO,
+  image: cover ? `${site.url}${cover}` : `${site.url}${site.ogImage}`,
+  articleSection: etiquetaTipo,
+  // Autoria y edicion apuntan al nodo NGO que ya inyecta el layout con @id fijo,
+  // en vez de repetir nombre y logotipo: una sola entidad en el grafo.
+  author: { '@id': `${site.url}/#org` },
+  publisher: { '@id': `${site.url}/#org` },
+  isPartOf: { '@id': `${site.url}/#website` },
+  mainEntityOfPage: { '@type': 'WebPage', '@id': `${site.url}${ruta}` },
+  ...(location ? { contentLocation: { '@type': 'Place', name: location } } : {}),
+};
+
+const ICON = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+const iconoVolver = `<svg ${ICON} width="15" height="15" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>`;
+---
+
+<BaseLayout
+  title={tituloPestana}
+  ogTitle={title}
+  description={descripcion}
+  ogImage={cover ?? site.ogImage}
+  ogType="article"
+  publishedTime={fechaISO}
+  jsonLd={articleJsonLd}
+  breadcrumbs={[
+    { name: 'Inicio', url: '/' },
+    { name: 'Actualidad', url: '/actualidad/' },
+    { name: tituloPestana, url: ruta },
+  ]}
+>
+  <div class="page-hero noticia-hero">
+    <div class="container page-hero-content">
+      <span class="badge badge-white fade-in">{etiquetaTipo}</span>
+      <h1 class="fade-in fade-in-delay-1">{title}</h1>
+      {description && <p class="fade-in fade-in-delay-2">{description}</p>}
+      <p class="noticia-datos fade-in fade-in-delay-3">
+        <time datetime={fechaISO}>{fechaLarga(date)}</time>
+        {dates && <span>{dates}</span>}
+        {location && <span>{location}</span>}
+      </p>
+    </div>
+  </div>
+
+  <article class="section">
+    <div class="container-estrecho">
+      {cover && (
+        /* La portada es el elemento LCP de la pagina, asi que va con
+           loading="eager" y fetchpriority="high" en vez de diferida. Se usa
+           <Picture> y no un <img> a pelo porque scripts/generate-webp.mjs lee el
+           campo `cover` del frontmatter y genera para el los escalones de 800,
+           1200 y 1800 px que consume el srcset. El sizes corresponde al ancho
+           real del contenedor .container-estrecho (780 px con su relleno).
+           width y height declaran la relacion 16:9 que impone el CSS, para que
+           el hueco quede reservado y no haya salto de maquetacion.
+
+           El marco existe porque los estilos de la portada NO pueden colgar de
+           una clase pasada como prop a <Picture>: Astro pone el atributo de
+           ambito en los elementos de esta plantilla, no en el marcado que emite
+           un componente hijo, asi que una regla `.noticia-portada { ... }` de
+           este bloque no casaria con nada. El div si recibe el ambito, y desde
+           el se alcanza la imagen con un :global bien delimitado. */
+        <div class="noticia-portada fade-in">
+          <Picture
+            src={cover}
+            alt={`Fotografía de portada de la noticia: ${title}`}
+            width={1600}
+            height={900}
+            loading="eager"
+            fetchpriority="high"
+            sizes="(max-width: 820px) 100vw, 780px"
+          />
+        </div>
+      )}
+
+      <div class="prosa noticia-cuerpo fade-in">
+        <Content />
+      </div>
+
+      <p class="volver">
+        <a href={`${base}/actualidad/`} class="volver-enlace">
+          <span class="volver-icono" set:html={iconoVolver}></span>
+          Toda la actualidad
+        </a>
+      </p>
+    </div>
+  </article>
+
+  {esProyectoEuropeo && <EUBanner programas={programasEU} />}
+</BaseLayout>
+
+<style>
+  /* El titular de una noticia es mas largo que el de una pagina de seccion, asi
+     que se rebaja un punto respecto al tamano de .page-hero h1 para que no
+     ocupe cinco lineas en movil. Los selectores llevan .page-hero delante a
+     proposito: las reglas de global.css son `.page-hero h1` y `.page-hero p`, y
+     el hash de ambito de Astro va en :where(), que no suma especificidad, asi
+     que sin esa clase de mas estas declaraciones perderian el pulso. */
+  .page-hero.noticia-hero h1 {
+    font-size: clamp(1.75rem, 3.4vw, 2.6rem);
+    max-width: 800px;
+  }
+
+  .page-hero.noticia-hero .noticia-datos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.25rem;
+    margin-top: 1.25rem;
+    max-width: none;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.72);
+  }
+
+  /* El marco impone la proporcion y el redondeo y recorta lo que sobra. La
+     imagen la emite <Picture>, asi que se alcanza con :global acotado al marco:
+     fuera de .noticia-portada esta regla no aplica a nada. */
+  .noticia-portada {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    margin-bottom: 2.5rem;
+  }
+  .noticia-portada :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .noticia-cuerpo :global(h2:first-child) {
+    margin-top: 0;
+  }
+
+  .volver {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--linea);
+  }
+  .volver-enlace {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--terracota-texto);
+    text-decoration: none;
+  }
+  .volver-enlace:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .volver-icono {
+    display: inline-flex;
+  }
+</style>

@@ -1,0 +1,269 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import Stats from '../components/Stats.astro';
+import Areas from '../components/Areas.astro';
+import ProyectoCard from '../components/ProyectoCard.astro';
+import { site } from '../data/site';
+import { proyectos } from '../data/proyectos';
+import { colorTipo, etiquetaTipo } from '../lib/noticias';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// El title es exactamente site.name: el BaseLayout detecta asi que esta es la
+// portada y arma el titulo de pestana con el descriptor largo, en vez de
+// prefijar el nombre de la asociacion dos veces.
+const title = site.name;
+
+// Ultimas novedades. Se ordenan por fecha descendente comparando la cadena tal
+// cual: el esquema admite "YYYY-MM" y "YYYY-MM-DD" y la comparacion
+// lexicografica de ISO ya da el orden cronologico correcto en ambos formatos,
+// sin construir objetos Date que en formato corto se interpretan en UTC y pueden
+// saltar de mes.
+const noticias = (await getCollection('noticias')).sort((a, b) =>
+  b.data.date.localeCompare(a.data.date),
+);
+const ultimas = noticias.slice(0, 3);
+
+// Fechas en espanol. Con formato "YYYY-MM" solo hay mes y ano, asi que no se
+// inventa un dia 1 en la salida visible.
+const formatoDia = new Intl.DateTimeFormat('es-ES', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+const formatoMes = new Intl.DateTimeFormat('es-ES', {
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+
+const fechaLegible = (fecha: string) =>
+  fecha.length === 7
+    ? formatoMes.format(new Date(`${fecha}-01T00:00:00Z`))
+    : formatoDia.format(new Date(`${fecha}T00:00:00Z`));
+---
+
+<BaseLayout title={title}>
+  <Hero />
+  <Stats />
+
+  <section class="section" aria-labelledby="mision-titulo">
+    <div class="container-estrecho">
+      <div class="fade-in">
+        <p class="section-label">Quiénes somos</p>
+        <div class="divider"></div>
+        <h2 id="mision-titulo" class="section-title">Nuestra misión</h2>
+      </div>
+
+      <div class="prosa mision-prosa fade-in fade-in-delay-1">
+        <p>
+          Empoderar a las personas jóvenes de Melilla mediante la <strong>educación no
+          formal</strong>, promoviendo los valores europeos, la ciudadanía activa y la
+          participación en la vida democrática, y haciendo visible el impacto positivo de
+          las oportunidades de la Unión Europea en la juventud, especialmente en regiones
+          alejadas como Melilla.
+        </p>
+        <p>
+          Trabajamos a nivel local con un enfoque intercultural fuerte que refleja la
+          diversidad cultural de la ciudad. La asociación está formada íntegramente por
+          <strong>voluntariado</strong>: cinco personas que coordinan actividades,
+          facilitan sesiones de aprendizaje y gestionan las alianzas y la ejecución de los
+          proyectos.
+        </p>
+        <p>
+          Estrella del Rif se constituyó en 2024 y es una entidad de nueva incorporación a
+          los fondos europeos. Sus dos primeros proyectos Erasmus+ arrancan en el verano de
+          2026.
+        </p>
+        <p>
+          <a href={`${base}/sobre-nosotros/`}>Conoce al equipo y la historia de la asociación</a>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <Areas />
+
+  <section class="section" aria-labelledby="proyectos-titulo">
+    <div class="container">
+      <div class="bloque-cabecera fade-in">
+        <p class="section-label">Proyectos</p>
+        <div class="divider"></div>
+        <h2 id="proyectos-titulo" class="section-title">Proyectos en marcha</h2>
+        <p class="section-subtitle">
+          Dos proyectos de Erasmus+ Juventud aprobados en la convocatoria 2026, ronda 1,
+          por la Agencia Nacional Española de la Juventud (INJUVE). Empiezan en el verano
+          de 2026, así que lo que aquí se cuenta es lo que van a hacer.
+        </p>
+      </div>
+
+      <div class="grid-2 fade-in fade-in-delay-1">
+        {proyectos.map((proyecto) => <ProyectoCard proyecto={proyecto} />)}
+      </div>
+
+      <p class="bloque-mas fade-in fade-in-delay-2">
+        <a href={`${base}/proyectos/`} class="btn btn-outline">Ver todos los proyectos</a>
+      </p>
+    </div>
+  </section>
+
+  {/* Mientras no haya ninguna noticia publicada la seccion entera desaparece:
+      una rejilla vacia con un boton de "ver toda la actualidad" no aporta nada y
+      da la impresion de que algo se ha roto. */}
+  {ultimas.length > 0 && (
+    <section class="section section-cal" aria-labelledby="novedades-titulo">
+      <div class="container">
+        <div class="bloque-cabecera fade-in">
+          <p class="section-label">Actualidad</p>
+          <div class="divider"></div>
+          <h2 id="novedades-titulo" class="section-title">Últimas novedades</h2>
+        </div>
+
+        <ul class="novedades grid-3 fade-in fade-in-delay-1">
+          {ultimas.map((noticia) => (
+            <li class="novedad card">
+              {/* El enlace cubre la tarjeta entera, asi que su nombre accesible
+                  seria la concatenacion del distintivo, el titular, el resumen y
+                  la fecha: varias frases seguidas en un lector de pantalla. El
+                  aria-label lo reduce al titular, y contiene el texto visible del
+                  h3 para no incumplir el criterio 2.5.3 de etiqueta en el nombre. */}
+              <a
+                href={`${base}/actualidad/${noticia.id}/`}
+                class="novedad-enlace"
+                aria-label={`Leer la noticia: ${noticia.data.title}`}
+              >
+                <span class:list={['badge', `badge-${colorTipo(noticia.data.type)}`]}>
+                  {etiquetaTipo(noticia.data.type)}
+                </span>
+                <h3>{noticia.data.title}</h3>
+                {noticia.data.description && (
+                  <p class="novedad-resumen">{noticia.data.description}</p>
+                )}
+                <p class="novedad-meta">
+                  <time datetime={noticia.data.date}>{fechaLegible(noticia.data.date)}</time>
+                  {noticia.data.location && <span>{noticia.data.location}</span>}
+                </p>
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <p class="bloque-mas fade-in fade-in-delay-2">
+          <a href={`${base}/actualidad/`} class="btn btn-outline">Ver toda la actualidad</a>
+        </p>
+      </div>
+    </section>
+  )}
+
+  <section class="cta-oscuro" aria-labelledby="cta-titulo">
+    <div class="container cta-inner fade-in">
+      <p class="section-label section-label-claro">Da el paso</p>
+      <h2 id="cta-titulo">¿Quieres participar en un proyecto europeo?</h2>
+      <p class="cta-texto">
+        «Melilla is Europe» selecciona a quince jóvenes de Melilla de 18 a 21 años.
+        «Democracia sin barreras» reúne a treinta jóvenes de 18 a 30 años, que
+        seleccionan las entidades del consorcio. Escríbenos y te avisamos cuando se
+        abra cada selección.
+      </p>
+      <div class="cta-acciones">
+        <a href={`${base}/participa/`} class="btn btn-oro btn-lg">Cómo participar</a>
+        <a href={`${base}/contacto/`} class="btn btn-outline-white btn-lg">Contactar</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .mision-prosa {
+    margin-top: 0.5rem;
+    font-size: 1.05rem;
+  }
+
+  .bloque-cabecera {
+    margin-bottom: 2.5rem;
+  }
+  .bloque-mas {
+    margin-top: 2.5rem;
+  }
+
+  .novedad {
+    overflow: hidden;
+  }
+  /* Igual que en ProyectoCard: el enlace cubre la tarjeta entera para que el
+     area pulsable sea la que la gente intenta pulsar, y para que haya un solo
+     destino por tarjeta. */
+  .novedad-enlace {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+    height: 100%;
+    padding: 1.5rem;
+    text-decoration: none;
+  }
+  .novedad h3 {
+    font-size: 1.15rem;
+    line-height: 1.3;
+    color: var(--indigo);
+  }
+  .novedad-resumen {
+    font-size: 0.93rem;
+    line-height: 1.65;
+    color: var(--tinta-suave);
+  }
+  .novedad-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.75rem;
+    margin-top: auto;
+    padding-top: 0.9rem;
+    font-size: 0.82rem;
+    color: var(--tinta-tenue);
+  }
+  .novedad:hover h3 {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* .cta-oscuro no esta en global.css porque su maquetacion cambia de una pagina
+     a otra; lo que si esta alli es el anillo de foco en oro para los enlaces que
+     van dentro, que sobre indigo es lo unico que se ve. */
+  .cta-oscuro {
+    background: var(--indigo);
+    padding: 5rem 0;
+  }
+  .cta-inner {
+    max-width: 780px;
+  }
+  .cta-oscuro h2 {
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+    color: #fff;
+    margin-bottom: 1rem;
+  }
+  .cta-texto {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  .cta-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    margin-top: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    .cta-oscuro {
+      padding: 3.5rem 0;
+    }
+  }
+  @media (max-width: 520px) {
+    .cta-acciones .btn {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>

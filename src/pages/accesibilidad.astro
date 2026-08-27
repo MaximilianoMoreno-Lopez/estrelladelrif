@@ -1,0 +1,185 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
+import { LEGAL_VERSION, LEGAL_VERSION_LABEL } from '../lib/legal.js';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const correo = `<a href="mailto:${site.email}">${site.email}</a>`;
+
+// Mismo patron que privacidad.astro y terminos.astro: el texto vive en un array
+// de secciones para que el diff del commit que sube LEGAL_VERSION ensene solo el
+// cambio de redaccion. Ver el comentario largo de privacidad.astro.
+//
+// Esta pagina no promete conformidad certificada. La evaluacion es una
+// autoevaluacion del equipo que ha construido el sitio, y decirlo asi es parte
+// de la declaracion: afirmar «conforme» sin auditoria externa seria una
+// declaracion falsa, y una declaracion de accesibilidad que exagera es
+// exactamente lo contrario de lo que pretende.
+const secciones = [
+  {
+    h: '1. Compromiso',
+    p: [
+      `${site.name} trabaja para que sus actividades sean accesibles a todas las personas jóvenes, incluidas las que tienen alguna discapacidad. La inclusión de jóvenes con discapacidad es una de las áreas de trabajo de la asociación, así que la accesibilidad de su web no es un añadido: es coherencia con lo que hace.`,
+      'Esta declaración explica el grado de accesibilidad de este sitio web, cómo se ha comprobado y cómo avisarnos si encuentras una barrera.',
+    ],
+  },
+  {
+    h: '2. Grado de cumplimiento declarado',
+    p: [
+      'Este sitio web se ha diseñado y desarrollado tomando como objetivo la conformidad con las <strong>Pautas de Accesibilidad para el Contenido Web (WCAG) 2.2 en nivel AA</strong>, que son la referencia de la norma europea EN 301 549.',
+      'El grado que se declara es de <strong>conformidad parcial</strong>: la conformidad con el nivel AA es el objetivo con el que se ha construido cada página y se ha verificado en las revisiones descritas más abajo, pero <strong>la evaluación es una autoevaluación realizada por el equipo que mantiene el sitio y no una auditoría de accesibilidad externa ni una certificación</strong>. No podemos, por tanto, afirmar una conformidad plena verificada por un tercero independiente.',
+    ],
+  },
+  {
+    h: '3. Cómo se ha evaluado',
+    p: [
+      'La comprobación se ha hecho mediante revisión manual de cada plantilla del sitio: recorrido completo con teclado, revisión del marcado y de la jerarquía de encabezados, cálculo de las relaciones de contraste de la paleta y comprobación del comportamiento con la animación reducida activada y con distintos tamaños de texto y anchos de ventana.',
+      'No se ha realizado una auditoría externa, ni pruebas sistemáticas con personas usuarias de lectores de pantalla. Cuando la asociación pueda contar con esas pruebas, actualizará esta declaración.',
+    ],
+  },
+  {
+    h: '4. Medidas de accesibilidad aplicadas en este sitio',
+    p: [
+      'Estas son las medidas efectivamente implementadas, no una lista de buenas intenciones:',
+      '<ul>' +
+        '<li><strong>Enlace de salto al contenido.</strong> La primera parada del tabulador en cada página es un enlace «Saltar al contenido» que lleva directamente al área principal, visible en cuanto recibe el foco, para no obligar a recorrer la navegación en cada página.</li>' +
+        '<li><strong>Contraste calculado color por color.</strong> Se ha calculado la relación de contraste de cada color de la paleta contra los fondos sobre los que se usa realmente. Los colores que el sitio emplea como texto alcanzan al menos <strong>4,5:1</strong>, el umbral del criterio 1.4.3: los grises de texto quedan entre 5:1 y 16:1 sobre los tres fondos claros del sitio, y el blanco y el oro sobre los fondos índigo entre 4,7:1 y 15:1. Los colores de marca que no llegan a ese umbral sobre fondo claro <strong>no se usan como color de texto</strong>: el terracota y el turquesa puros, que solo aparecen como texto en sus variantes oscurecidas, y el oro, que sobre blanco se queda en 2,2:1 y únicamente se emplea sobre los fondos índigo o como elemento gráfico.</li>' +
+        '<li><strong>Foco de teclado visible.</strong> Todos los elementos interactivos muestran un indicador de foco nítido y con contraste suficiente, también sobre los fondos oscuros de las cabeceras y del pie, donde el indicador cambia de color para seguir siendo perceptible.</li>' +
+        '<li><strong>Navegación completa por teclado.</strong> Se puede llegar a cada enlace, botón y control del sitio con el tabulador, en un orden que coincide con el orden de lectura, y el menú desplegable de móvil se abre, se recorre y se cierra sin ratón. Ninguna función depende de pasar el puntero por encima.</li>' +
+        '<li><strong>Respeto a <code>prefers-reduced-motion</code>.</strong> Si tu sistema operativo indica preferencia por movimiento reducido, las animaciones de aparición y los desplazamientos se desactivan y el contenido se muestra directamente.</li>' +
+        '<li><strong>Texto alternativo.</strong> Toda imagen con contenido informativo lleva un alternativo que transmite la misma información; las imágenes puramente decorativas se marcan con alternativo vacío y se ocultan a las tecnologías de asistencia, para no añadir ruido.</li>' +
+        '<li><strong>Jerarquía de encabezados.</strong> Cada página tiene un único <code>h1</code> y los niveles siguientes descienden sin saltos, de modo que la navegación por encabezados de un lector de pantalla refleja la estructura real del contenido.</li>' +
+        '<li><strong>HTML semántico y regiones etiquetadas.</strong> Se usan los elementos propios de cada función —cabecera, navegación, contenido principal, artículos, listas, pie— y cada bloque de navegación y cada sección que necesita distinguirse de otra lleva su propia etiqueta accesible.</li>' +
+        '<li><strong>Sin contenido que parpadee.</strong> No hay elementos intermitentes, destellos ni carruseles automáticos, ni contenido en movimiento que no se pueda detener.</li>' +
+        '<li><strong>Tipografía escalable.</strong> Los tamaños de texto y los espacios se expresan en unidades relativas, así que el texto responde al tamaño de fuente configurado en el navegador y admite ampliaciones de al menos el 200 % sin pérdida de contenido ni de funcionalidad.</li>' +
+        '<li><strong>Idioma declarado y páginas identificables.</strong> El idioma de las páginas se declara en el marcado, y cada página tiene un título propio y descriptivo.</li>' +
+        '<li><strong>Diseño adaptable.</strong> El contenido se reorganiza en una sola columna en pantallas estrechas sin necesidad de desplazamiento horizontal.</li>' +
+        '<li><strong>Información nunca solo por color.</strong> Los estados y las categorías se acompañan siempre de texto, no solo de un color o de una forma.</li>' +
+      '</ul>',
+    ],
+  },
+  {
+    h: '5. Limitaciones conocidas',
+    p: [
+      'Somos conscientes de estos puntos:',
+      '<ul>' +
+        '<li>El <strong>emblema de la Unión Europea</strong> con la mención de cofinanciación se sirve como imagen que contiene texto, porque las normas de visibilidad del programa Erasmus+ obligan a reproducirlo sin alterarlo. La imagen lleva un texto alternativo equivalente y la misma información se repite como texto en la propia página.</li>' +
+        '<li>Los <strong>documentos y enlaces de terceros</strong> a los que apunta este sitio (convocatorias, portales institucionales, materiales de entidades socias) no están bajo nuestro control y su accesibilidad puede no alcanzar el mismo nivel.</li>' +
+        '<li>No se han realizado <strong>pruebas con personas usuarias</strong> de tecnologías de asistencia, tal como se indica en el apartado 3.</li>' +
+        '<li>La comprobación de <strong>contraste</strong> es un cálculo manual de cada color de la paleta contra los fondos sobre los que se usa, no un análisis automático de todas las páginas ya generadas. Los fondos en degradado se han medido en el tramo sobre el que se apoya cada texto. Si aun así encuentras una combinación que no llegue a 4,5:1, avísanos por la vía del apartado 6: se corrige en el propio código de la paleta, así que el arreglo alcanza a la vez a todas las páginas donde aparezca.</li>' +
+      '</ul>',
+    ],
+  },
+  {
+    h: '6. Cómo avisarnos de una barrera',
+    p: [
+      `Si encuentras un contenido que no puedes usar, una página que no funciona con tu tecnología de asistencia o cualquier otra barrera, escríbenos a ${correo}. Indícanos, en la medida en que puedas: la dirección de la página, qué intentabas hacer, qué ocurrió y qué navegador o ayuda técnica utilizas. Cualquier detalle sirve, aunque no sepas describir el problema en términos técnicos.`,
+      'Acusaremos recibo y responderemos en un plazo máximo de veinte días hábiles. Si la corrección requiere más tiempo, te diremos cuándo prevemos resolverlo. Por esta misma vía puedes solicitar que te facilitemos en un formato alternativo accesible cualquier información publicada en el sitio.',
+      'Si la respuesta no te resulta satisfactoria, puedes trasladarnos una queja por el mismo canal, dirigida al órgano de gobierno de la asociación.',
+    ],
+  },
+  {
+    h: '7. Normativa de referencia',
+    p: [
+      `${site.name} es una asociación privada sin ánimo de lucro y no un organismo del sector público, por lo que no está sujeta al Real Decreto 1112/2018, sobre accesibilidad de los sitios web y aplicaciones para dispositivos móviles del sector público, que traspone la Directiva (UE) 2016/2102. Aun así, tomamos como referencia voluntaria ese real decreto, la norma <strong>EN 301 549</strong> y las <strong>WCAG 2.2 nivel AA</strong>, por convicción y porque los proyectos de la asociación se financian con fondos europeos y la accesibilidad es un principio horizontal del programa Erasmus+.`,
+    ],
+  },
+  {
+    h: '8. Preparación de esta declaración',
+    p: [
+      `Esta declaración se preparó el <strong>${LEGAL_VERSION_LABEL}</strong> y se basa en la autoevaluación descrita en el apartado 3, realizada por el equipo que desarrolla y mantiene el sitio. Se revisará cuando se publiquen nuevas secciones del sitio y, en todo caso, siempre que se detecte o se nos comunique una barrera.`,
+    ],
+  },
+];
+
+const esLista = (html: string) => html.startsWith('<ul');
+---
+
+<BaseLayout
+  title="Accesibilidad"
+  description={`Declaración de accesibilidad del sitio web de ${site.name}: objetivo WCAG 2.2 nivel AA, medidas aplicadas, limitaciones conocidas y canal para avisar de barreras.`}
+  breadcrumbs={[
+    { name: 'Inicio', url: '/' },
+    { name: 'Accesibilidad', url: '/accesibilidad/' },
+  ]}
+>
+  <div class="page-hero">
+    <div class="container page-hero-content">
+      <span class="badge badge-white fade-in">Declaración de accesibilidad</span>
+      <h1 class="fade-in fade-in-delay-1">Accesibilidad</h1>
+      <p class="fade-in fade-in-delay-2">
+        Qué nivel de accesibilidad tiene este sitio web, cómo lo hemos comprobado y
+        cómo avisarnos si encuentras una barrera.
+      </p>
+    </div>
+  </div>
+
+  <section class="section" aria-label="Texto de la declaración de accesibilidad">
+    <div class="container-estrecho">
+      <p class="legal-vigencia fade-in">
+        Versión {LEGAL_VERSION} · declaración en vigor desde el {LEGAL_VERSION_LABEL}.
+      </p>
+
+      <div class="prosa legal-cuerpo fade-in">
+        {secciones.map((s) => (
+          <div class="legal-bloque">
+            <h2>{s.h}</h2>
+            {s.p.map((parrafo) =>
+              esLista(parrafo) ? <div class="legal-lista" set:html={parrafo} /> : <p set:html={parrafo} />,
+            )}
+          </div>
+        ))}
+      </div>
+
+      <p class="legal-pie fade-in">
+        Consulta también la <a href={`${base}/privacidad/`}>política de privacidad</a> y los
+        <a href={`${base}/terminos/`}>términos de uso</a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .legal-vigencia {
+    font-size: 0.85rem;
+    color: var(--tinta-tenue);
+    padding-bottom: 1.25rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--linea);
+  }
+
+  .legal-bloque:first-child h2 {
+    margin-top: 0;
+  }
+
+  .legal-lista :global(ul) {
+    margin-top: -0.35rem;
+  }
+
+  /* Los nombres de propiedades CSS y de elementos HTML citados en el texto van
+     en <code>; sin tamano reducido rompian el ritmo vertical de la linea. */
+  .legal-cuerpo :global(code) {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.88em;
+    background: var(--cal-oscuro);
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-sm);
+    padding: 0.05em 0.35em;
+    color: var(--indigo);
+  }
+
+  .legal-pie {
+    margin-top: 3rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--linea);
+    font-size: 0.85rem;
+    color: var(--tinta-tenue);
+    line-height: 1.7;
+  }
+  .legal-pie a {
+    color: var(--terracota-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

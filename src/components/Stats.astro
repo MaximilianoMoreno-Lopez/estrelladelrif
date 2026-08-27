@@ -1,0 +1,111 @@
+---
+// Banda de cifras de la portada.
+//
+// Solo las cuatro cifras verificadas y publicables del expediente: numero de
+// proyectos aprobados, participantes directos previstos, entidades socias del
+// consorcio de KA154 y ano de constitucion. No hay cifras de resultados porque
+// ninguno de los dos proyectos se ha ejecutado todavia; inventar un "personas
+// alcanzadas" seria falso.
+//
+// El pie de cada cifra dice de donde sale el numero. Asi la cifra no queda
+// suelta y se entiende que 45 son participantes previstos, no historicos.
+const ICON =
+  'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+
+const cifras = [
+  {
+    valor: '2',
+    titulo: 'proyectos Erasmus+ aprobados',
+    pie: 'Convocatoria 2026, ronda 1',
+    icono:
+      '<path d="M14 3v5h5"/><path d="M19 8.5V20a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h8Z"/><path d="M9 14.8l2 2 4-4.2"/>',
+  },
+  {
+    valor: '45',
+    titulo: 'jóvenes participantes directos',
+    pie: '30 en KA154 y 15 en KA155',
+    icono:
+      '<path d="M16 20.5v-1.6a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1.6"/><circle cx="9.5" cy="7.5" r="3.5"/><path d="M21 20.5v-1.6a4 4 0 0 0-3-3.87"/><path d="M16.4 4.2a3.5 3.5 0 0 1 0 6.6"/>',
+  },
+  {
+    valor: '6',
+    titulo: 'entidades socias',
+    pie: 'Consorcio de «Democracia sin barreras»',
+    icono:
+      '<circle cx="5" cy="6" r="2.5"/><circle cx="19" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M7.5 6h9"/><path d="M6.3 8.3l4.4 7.6"/><path d="M17.7 8.3l-4.4 7.6"/>',
+  },
+  {
+    valor: '2024',
+    titulo: 'año de constitución',
+    pie: 'Asociación juvenil con sede en Melilla',
+    icono:
+      '<rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M8 3v4"/><path d="M16 3v4"/><path d="M3.5 10h17"/>',
+  },
+];
+---
+
+<section class="cifras section-sm" aria-label="Estrella del Rif en cifras">
+  <div class="container">
+    <ul class="cifras-lista grid-4">
+      {cifras.map((cifra) => (
+        <li class="cifra">
+          <span class="cifra-icono" aria-hidden="true">
+            <Fragment set:html={`<svg ${ICON} width="22" height="22">${cifra.icono}</svg>`} />
+          </span>
+          <p class="cifra-valor">{cifra.valor}</p>
+          <p class="cifra-titulo">{cifra.titulo}</p>
+          <p class="cifra-pie">{cifra.pie}</p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .cifras {
+    background: var(--white);
+    border-bottom: 1px solid var(--linea);
+  }
+
+  .cifra {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2rem;
+    padding-left: 1.1rem;
+    /* La linea de la izquierda separa las columnas sin necesidad de tarjetas:
+       la banda queda ligera justo debajo del hero, que ya es un bloque pesado. */
+    border-left: 2px solid var(--oro-dim);
+  }
+
+  .cifra-icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    margin-bottom: 0.45rem;
+    border-radius: var(--radius-md);
+    background: var(--turquesa-dim);
+    color: var(--turquesa-texto);
+  }
+
+  .cifra-valor {
+    font-family: 'Playfair Display Variable', 'Playfair Display', 'Playfair Display Fallback', Georgia, serif;
+    font-weight: 700;
+    font-size: clamp(2.1rem, 4vw, 2.7rem);
+    line-height: 1.05;
+    color: var(--indigo);
+  }
+  .cifra-titulo {
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: var(--tinta);
+    line-height: 1.4;
+  }
+  .cifra-pie {
+    font-size: 0.82rem;
+    color: var(--tinta-tenue);
+    line-height: 1.5;
+  }
+</style>

@@ -1,0 +1,189 @@
+---
+import { site, navLinks, footerLinks } from '../data/site';
+import { LEGAL_VERSION_LABEL } from '../lib/legal.js';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Se evalua al generar el sitio, que es exactamente lo que interesa: el
+// despliegue se rehace en cada push, asi que el aviso de copyright se actualiza
+// solo. Estaba fijado a 2026 a mano y habria dicho «2026» para siempre.
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-marca">
+        <div class="footer-logo">
+          <img
+            src={`${base}/images/logo-claro.svg`}
+            alt=""
+            width="40"
+            height="40"
+            aria-hidden="true"
+          />
+          <div>
+            <p class="footer-nombre">{site.name}</p>
+            <p class="footer-claim">Melilla · Juventud · Europa</p>
+          </div>
+        </div>
+        <p class="footer-texto">
+          Asociación juvenil sin ánimo de lucro constituida en {site.founded} en Melilla.
+          Educación no formal, participación democrática, inclusión y oportunidades
+          europeas para la juventud de la ciudad.
+        </p>
+        <p class="footer-legal-datos">
+          NIF {site.nif} · OID Erasmus+ {site.oid}
+        </p>
+      </div>
+
+      <nav class="footer-col" aria-label="Navegación del pie">
+        <h2>Navegación</h2>
+        <ul>
+          {navLinks
+            .filter((enlace) => enlace.href !== '/')
+            .map((enlace) => (
+              <li><a href={`${base}${enlace.href}`}>{enlace.label}</a></li>
+            ))}
+        </ul>
+      </nav>
+
+      <nav class="footer-col" aria-label="Información institucional">
+        <h2>Institucional</h2>
+        <ul>
+          {footerLinks.map((enlace) => (
+            <li><a href={`${base}${enlace.href}`}>{enlace.label}</a></li>
+          ))}
+        </ul>
+      </nav>
+
+      <div class="footer-col">
+        <h2>Contacto</h2>
+        <ul>
+          <li><a href={`mailto:${site.email}`}>{site.email}</a></li>
+          <li><a href={`tel:${site.phoneHref}`}>{site.phone}</a></li>
+          <li class="footer-direccion">
+            {site.address.street}<br />
+            {site.address.postalCode} {site.address.city}
+          </li>
+        </ul>
+        {site.socials.length > 0 && (
+          <ul class="footer-redes">
+            {site.socials.map((red) => (
+              <li><a href={red.url} rel="me noopener">{red.label}</a></li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+
+    <div class="footer-barra">
+      <p>© {year} {site.name}. Todos los derechos reservados.</p>
+      <p>Textos legales vigentes desde el {LEGAL_VERSION_LABEL}.</p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--indigo);
+    color: rgba(255, 255, 255, 0.72);
+    padding: 4rem 0 2rem;
+    font-size: 0.92rem;
+  }
+
+  .footer-grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr 1.2fr;
+    gap: 2.5rem;
+  }
+
+  .footer-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  .footer-nombre {
+    font-family: 'Playfair Display Variable', 'Playfair Display', 'Playfair Display Fallback', Georgia, serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #fff;
+    line-height: 1.2;
+  }
+  .footer-claim {
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--oro);
+  }
+  .footer-texto {
+    max-width: 40ch;
+    line-height: 1.7;
+  }
+  .footer-legal-datos {
+    margin-top: 1rem;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .footer-col h2 {
+    font-family: 'DM Sans Variable', 'DM Sans', 'DM Sans Fallback', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--oro);
+    margin-bottom: 0.9rem;
+  }
+  .footer-col li {
+    margin-bottom: 0.55rem;
+  }
+  .footer-col a {
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .footer-col a:hover {
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .footer-direccion {
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  .footer-redes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+
+  .footer-barra {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  @media (max-width: 900px) {
+    .footer-grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    .footer-marca {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .footer-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

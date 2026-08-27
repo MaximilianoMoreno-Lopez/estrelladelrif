@@ -1,0 +1,383 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { site } from '../data/site';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+const ICON =
+  'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"';
+
+const iconos = {
+  correo: `<svg ${ICON}><path d="M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/><path d="m3.5 6.5 8.5 6 8.5-6"/></svg>`,
+  telefono: `<svg ${ICON}><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg>`,
+  sede: `<svg ${ICON}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="2.5"/></svg>`,
+};
+
+const direccionCompleta = `${site.address.street}, ${site.address.postalCode} ${site.address.city}`;
+
+// Enlace externo al mapa en vez de un iframe incrustado.
+//
+// Incrustar Google Maps (o cualquier mapa de terceros) cargaria scripts y
+// cookies de ese tercero en cuanto se abre la pagina, sin que nadie lo haya
+// pedido. Este sitio no tiene aviso de cookies precisamente porque no carga
+// ninguna: no hay analitica, ni fuentes remotas, ni incrustaciones. Meter un
+// mapa obligaria a poner un banner de consentimiento y a declarar un encargado
+// del tratamiento mas en /privacidad/, y todo eso para mostrar un plano que
+// casi nadie usa desde el escritorio. Un enlace normal deja la decision en
+// quien navega: solo sale del sitio si pulsa. La alternativa de un mapa
+// autoalojado (tiles propias, Leaflet) se descarto por peso y mantenimiento
+// para una sola direccion.
+const mapaUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+  `${direccionCompleta}, España`,
+)}`;
+
+const motivos = [
+  {
+    titulo: 'Participar',
+    texto:
+      'Quieres una plaza en uno de los proyectos, entrar como voluntaria o voluntario o darte de alta como socia o socio.',
+    enlace: { href: `${base}/participa/`, texto: 'Cómo participar' },
+  },
+  {
+    titulo: 'Proponer una alianza',
+    texto:
+      'Eres una entidad juvenil, un centro educativo, una asociación de personas con discapacidad o una administración y quieres colaborar en una actividad.',
+    enlace: { href: `${base}/que-hacemos/`, texto: 'Qué hacemos' },
+  },
+  {
+    titulo: 'Prensa',
+    texto:
+      'Necesitas datos, una declaración o material sobre los proyectos. Indica el medio y el plazo de cierre y respondemos con lo que esté verificado.',
+    enlace: { href: `${base}/proyectos/`, texto: 'Los proyectos' },
+  },
+  {
+    // No se anuncia la entrega de documentacion: los documentos institucionales
+    // figuran como "Proximamente" en /transparencia/ porque no estan aprobados ni
+    // facilitados, asi que este motivo es para preguntar, no para recibir.
+    titulo: 'Preguntar por documentación',
+    texto:
+      'Quieres preguntar por un documento institucional o por el detalle de una subvención. Te contamos en qué situación está.',
+    enlace: { href: `${base}/transparencia/`, texto: 'Transparencia' },
+  },
+];
+
+const identificacion = [
+  { etiqueta: 'Denominación', valor: site.legalName },
+  {
+    etiqueta: 'Naturaleza jurídica',
+    valor: `Asociación juvenil sin ánimo de lucro, constituida en ${site.founded}`,
+  },
+  { etiqueta: 'NIF', valor: site.nif },
+  { etiqueta: 'OID Erasmus+', valor: site.oid },
+  { etiqueta: 'Domicilio social', valor: direccionCompleta },
+];
+
+// Nodo ContactPage. No repite los datos de la organizacion: los cuelga del
+// nodo NGO que ya inyecta BaseLayout con @id .../#org, de modo que buscadores y
+// modelos resuelven una sola entidad con un unico punto de contacto.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ContactPage',
+  '@id': `${site.url}/contacto/#page`,
+  url: `${site.url}/contacto/`,
+  name: `Contacto | ${site.name}`,
+  inLanguage: 'es-ES',
+  isPartOf: { '@id': `${site.url}/#website` },
+  about: { '@id': `${site.url}/#org` },
+  mainEntity: {
+    '@id': `${site.url}/#org`,
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'Información general',
+      email: site.email,
+      telephone: site.phoneHref,
+      availableLanguage: ['Español'],
+      areaServed: 'ES-ML',
+    },
+  },
+};
+---
+
+<BaseLayout
+  title="Contacto"
+  description={`Contacto de ${site.name}: correo ${site.email}, teléfono ${site.phone} y sede en Melilla. Para participar, proponer una alianza, prensa o preguntar por documentación.`}
+  jsonLd={jsonLd}
+  breadcrumbs={[
+    { name: 'Inicio', url: '/' },
+    { name: 'Contacto', url: '/contacto/' },
+  ]}
+>
+  <section class="page-hero">
+    <div class="container page-hero-content">
+      <h1 class="fade-in">Contacto</h1>
+      <p class="fade-in fade-in-delay-1">
+        Un buzón, un teléfono y una sede en Melilla. Escribe y te contestamos: no hay
+        formulario, ni centralita, ni respuestas automáticas.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="vias">
+    <div class="container">
+      <h2 class="visually-hidden" id="vias">Vías de contacto</h2>
+
+      <div class="grid-3 canales">
+        <div class="card-plana canal fade-in">
+          <span class="canal-icono" aria-hidden="true" set:html={iconos.correo} />
+          <h3>Correo electrónico</h3>
+          <p class="canal-dato">
+            <a href={`mailto:${site.email}`}>{site.email}</a>
+          </p>
+          <p class="canal-nota">La vía preferida. Respondemos en días laborables.</p>
+        </div>
+
+        <div class="card-plana canal fade-in fade-in-delay-1">
+          <span class="canal-icono" aria-hidden="true" set:html={iconos.telefono} />
+          <h3>Teléfono</h3>
+          <p class="canal-dato">
+            <a href={`tel:${site.phoneHref}`}>{site.phone}</a>
+          </p>
+          <p class="canal-nota">
+            Útil si el correo no te resulta accesible o si el asunto es urgente.
+          </p>
+        </div>
+
+        <div class="card-plana canal fade-in fade-in-delay-2">
+          <span class="canal-icono" aria-hidden="true" set:html={iconos.sede} />
+          <h3>Sede</h3>
+          {/* <address> es contenido de flujo y no puede ir dentro de un <p>:
+              va directo, con font-style normal, porque la cursiva por defecto
+              del navegador no pinta bien una direccion postal. */}
+          <address class="canal-dato canal-direccion">
+            {site.address.street}<br />
+            {site.address.postalCode} {site.address.city}<br />
+            {site.address.region}
+          </address>
+          <p class="canal-nota">
+            No es una oficina con horario de atención: concierta la visita antes por correo
+            o por teléfono.
+          </p>
+          <a
+            class="canal-enlace"
+            href={mapaUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Ver la dirección en Google Maps
+            <span class="visually-hidden">(se abre en una ventana nueva)</span>
+          </a>
+        </div>
+      </div>
+
+      <p class="nota fade-in">
+        La web no incrusta ningún mapa: el plano se abre en el servicio externo solo si
+        pulsas el enlace, así el sitio no carga cookies de terceros a tu espalda. Más
+        detalle en <a href={`${base}/privacidad/`}>Privacidad</a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="section section-cal" aria-labelledby="motivos">
+    <div class="container">
+      <div class="bloque-cabecera fade-in">
+        <p class="section-label">Para qué escribir</p>
+        <h2 class="section-title" id="motivos">Cuatro motivos habituales</h2>
+        <p class="section-subtitle">
+          Si dices desde el principio para qué escribes, la primera respuesta ya trae lo
+          que necesitas.
+        </p>
+      </div>
+
+      <div class="grid-2 motivos">
+        {motivos.map((motivo, i) => (
+          <div
+            class:list={[
+              'card-plana',
+              'motivo',
+              'fade-in',
+              `fade-in-delay-${(i % 4) + 1}`,
+            ]}
+          >
+            <h3>{motivo.titulo}</h3>
+            <p>{motivo.texto}</p>
+            <a href={motivo.enlace.href}>{motivo.enlace.texto}</a>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="identificacion">
+    <div class="container-estrecho">
+      <div class="bloque-cabecera fade-in">
+        <p class="section-label">Identificación</p>
+        <h2 class="section-title" id="identificacion">Datos de la entidad</h2>
+      </div>
+
+      <dl class="datos fade-in">
+        {identificacion.map((dato) => (
+          <div class="dato">
+            <dt>{dato.etiqueta}</dt>
+            <dd>{dato.valor}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <p class="nota fade-in">
+        Los datos registrales completos, la composición de la junta directiva y la
+        financiación pública recibida están en
+        <a href={`${base}/transparencia/`}>Transparencia</a>.
+      </p>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  /* Titulo que solo existe para los lectores de pantalla: la seccion de
+     canales no necesita un encabezado visible, pero un <section> con
+     aria-labelledby si necesita algo a lo que apuntar. */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .bloque-cabecera {
+    margin-bottom: 2.25rem;
+  }
+
+  /* ─── Canales ─── */
+  .canal {
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  .canal-icono {
+    display: inline-flex;
+    color: var(--turquesa-texto);
+    margin-bottom: 0.35rem;
+  }
+  .canal-icono :global(svg) {
+    width: 28px;
+    height: 28px;
+  }
+  .canal h3 {
+    font-size: 1.15rem;
+    color: var(--indigo);
+  }
+  .canal-dato {
+    font-size: 1rem;
+    color: var(--indigo);
+    /* Los correos largos no caben en una tarjeta estrecha; se permite el corte
+       en cualquier punto antes que un desbordamiento horizontal. */
+    overflow-wrap: anywhere;
+  }
+  .canal-dato a {
+    color: var(--terracota-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    font-weight: 600;
+  }
+  .canal-direccion {
+    font-style: normal;
+    line-height: 1.55;
+    font-size: 0.98rem;
+  }
+  .canal-nota {
+    font-size: 0.9rem;
+    color: var(--tinta-suave);
+    line-height: 1.6;
+  }
+  .canal-enlace {
+    margin-top: auto;
+    padding-top: 0.7rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--turquesa-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* ─── Motivos ─── */
+  .motivo {
+    padding: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .motivo h3 {
+    font-size: 1.1rem;
+    color: var(--indigo);
+  }
+  .motivo p {
+    font-size: 0.94rem;
+    color: var(--tinta-suave);
+    line-height: 1.6;
+  }
+  .motivo a {
+    margin-top: auto;
+    padding-top: 0.5rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--terracota-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* ─── Datos identificativos ─── */
+  .datos {
+    background: var(--white);
+    border: 1px solid var(--linea);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .dato {
+    display: grid;
+    gap: 0.15rem;
+    padding: 1rem 1.4rem;
+    border-bottom: 1px solid var(--linea);
+  }
+  .dato:last-child {
+    border-bottom: none;
+  }
+  .datos dt {
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tinta-tenue);
+  }
+  .datos dd {
+    color: var(--indigo);
+    font-size: 0.98rem;
+    line-height: 1.6;
+  }
+
+  @media (min-width: 680px) {
+    .dato {
+      grid-template-columns: 12rem minmax(0, 1fr);
+      gap: 1.5rem;
+      align-items: baseline;
+    }
+  }
+
+  .nota {
+    margin-top: 1.75rem;
+    font-size: 0.9rem;
+    color: var(--tinta-suave);
+    line-height: 1.65;
+    max-width: 660px;
+  }
+  .nota a {
+    color: var(--terracota-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

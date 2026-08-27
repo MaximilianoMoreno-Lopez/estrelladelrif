@@ -1,0 +1,80 @@
+---
+// Banda de cofinanciacion de la Union Europea con el emblema oficial.
+//
+// Es obligatoria en toda comunicacion sobre un proyecto financiado por Erasmus+,
+// junto con el descargo de responsabilidad literal. Va en las fichas de proyecto
+// y en las noticias de proyecto, no en las paginas institucionales, porque
+// declarar cofinanciacion europea de la asociacion entera seria inexacto.
+import { site } from '../data/site';
+
+interface Props {
+  programas?: string;
+}
+
+const { programas = 'Erasmus+ Juventud' } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+---
+
+<div class="eu-banner">
+  <div class="container eu-banner-inner">
+    <img
+      class="eu-emblema"
+      src={`${base}/images/eu-cofinanciado.png`}
+      alt="Cofinanciado por la Unión Europea"
+      width="1000"
+      height="210"
+      loading="lazy"
+      decoding="async"
+    />
+    <div class="eu-texto">
+      <p class="eu-programas">{programas}</p>
+      <p class="eu-descargo">
+        Las opiniones y puntos de vista expresados son responsabilidad exclusiva de
+        {' '}{site.name}{' '}
+        y no reflejan necesariamente la posición de la Unión Europea ni de la Agencia
+        Nacional Erasmus+.
+      </p>
+    </div>
+  </div>
+</div>
+
+<style>
+  .eu-banner {
+    background: var(--cal-oscuro);
+    border-top: 1px solid var(--linea);
+    padding: 1.75rem 0;
+  }
+  .eu-banner-inner {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  .eu-emblema {
+    height: 52px;
+    width: auto;
+    flex-shrink: 0;
+  }
+  .eu-texto {
+    flex: 1;
+    min-width: 240px;
+  }
+  .eu-programas {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--indigo);
+    margin-bottom: 0.25rem;
+  }
+  .eu-descargo {
+    font-size: 0.78rem;
+    color: var(--tinta-suave);
+    line-height: 1.55;
+    max-width: 660px;
+  }
+
+  @media (max-width: 640px) {
+    .eu-banner-inner {
+      gap: 1rem;
+    }
+  }
+</style>
