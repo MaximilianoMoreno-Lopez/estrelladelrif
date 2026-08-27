@@ -31,17 +31,12 @@ jobs:
       # el despliegue sin que nadie se enterara. Este paso lo caza antes.
       - name: Check
         run: npx astro check
+      # El sitio vive en la raiz de estrelladelrif.eu (dominio fijado en
+      # public/CNAME), asi que se construye sin prefijo de ruta. Para volver al
+      # subdirectorio de GitHub Pages bastaria con `env: GH_SUBPATH: '1'` aqui y
+      # borrar public/CNAME: ninguna pagina depende del modo.
       - name: Build
         run: npm run build
-        env:
-          # PASO PENDIENTE: quitar estas dos lineas y crear public/CNAME con
-          # `estrelladelrif.eu` en cuanto el dominio este registrado y su DNS
-          # apunte a GitHub Pages (registros en el README). Hasta entonces el
-          # sitio se sirve en
-          # https://maximilianomoreno-lopez.github.io/estrelladelrif/ y necesita
-          # el prefijo de ruta; todos los enlaces internos pasan por ${base}
-          # justamente para que el cambio sea de una linea.
-          GH_SUBPATH: '1'
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

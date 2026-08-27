@@ -65,17 +65,13 @@ npm run webp       # solo el pipeline de imágenes
 ## Despliegue
 
 Push a `main` → `.github/workflows/deploy.yml` comprueba tipos, construye y publica
-(~2 min). Settings → Pages: Source `GitHub Actions`.
+(~2 min). Settings → Pages: Source `GitHub Actions`, dominio propio `estrelladelrif.eu`
+(fijado en `public/CNAME`), Enforce HTTPS activado. DNS en Namecheap.
 
-**Hoy el sitio vive en un subdirectorio**:
-`https://maximilianomoreno-lopez.github.io/estrelladelrif/`. El dominio propio no está
-registrado todavía, así que el workflow construye con `GH_SUBPATH: '1'`. Localmente:
-`GH_SUBPATH=1 npm run build`.
-
-El día que el dominio esté listo, el cambio son tres pasos (crear `public/CNAME`, quitar
-el `env` del paso Build, poner el dominio en Settings → Pages) y **ninguna página se
-toca**: los enlaces internos pasan por `${base}` y las URL absolutas salen de
-`src/lib/urls.ts`. El procedimiento completo está en el README.
+El sitio se puede construir también para el subdirectorio de Pages con
+`GH_SUBPATH=1 npm run build`, que añade el prefijo `/estrelladelrif`. Por eso los enlaces
+internos pasan por `${base}` y las URL absolutas salen de `src/lib/urls.ts`: el modo de
+despliegue no obliga a tocar ninguna página.
 
 `robots.txt`, `site.webmanifest` y `llms.txt` **no son ficheros de `public/`**: son rutas
 generadas en `src/pages/`, porque los tres contienen URL absolutas o prefijos de ruta y

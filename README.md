@@ -4,8 +4,7 @@ Web de **Estrella del Rif**, asociación juvenil sin ánimo de lucro de Melilla 
 en 2024. Trabajamos con educación no formal para que la juventud de la ciudad participe en
 la vida democrática y acceda a las oportunidades europeas.
 
-- Sitio: https://maximilianomoreno-lopez.github.io/estrelladelrif/
-  (temporal, hasta que el dominio propio esté registrado y su DNS apunte aquí)
+- Sitio: https://estrelladelrif.eu
 - NIF G23831845 · OID Erasmus+ E10411785
 - Contacto: asoc.estrelladelrif@gmail.com
 
@@ -18,13 +17,14 @@ la vida democrática y acceda a las oportunidades europeas.
 | Tipografía | DM Sans + Playfair Display, self-hosted con `@fontsource-variable` |
 | Contenido | Markdown con Content Layer de Astro |
 | Imágenes | `sharp`, conversión a WebP en el build |
-| Alojamiento | GitHub Pages |
+| Alojamiento | GitHub Pages con dominio propio |
 | Dependencias en el navegador | ninguna: cero JavaScript de terceros, cero cookies, cero analítica |
 
 ## Estructura
 
 ```
 public/
+  CNAME                  dominio propio
   favicon.svg            marca para tamano pequeno (fuente)
   images/logo.svg        marca principal (fuente)
   images/logo-claro.svg  variante para fondo oscuro (generada)
@@ -83,29 +83,20 @@ npx astro check      # comprobacion de tipos
 ## Despliegue
 
 Cada push a `main` dispara `.github/workflows/deploy.yml`, que comprueba tipos con
-`astro check`, construye el sitio y lo publica en GitHub Pages. En **Settings → Pages**,
-Source es `GitHub Actions`.
+`astro check`, construye el sitio y lo publica en GitHub Pages. En **Settings → Pages**:
+Source `GitHub Actions`, dominio propio `estrelladelrif.eu` (fijado en `public/CNAME`),
+*Enforce HTTPS* activado.
 
-### Estado actual: subdirectorio
+### Volver al subdirectorio de Pages
 
-El dominio `estrelladelrif.eu` **todavía no está registrado**, así que el sitio se sirve
-en `https://maximilianomoreno-lopez.github.io/estrelladelrif/` y el workflow construye
-con `GH_SUBPATH: '1'`, que añade el prefijo `/estrelladelrif` a todas las rutas.
+Si alguna vez hace falta servir el sitio sin dominio propio, en
+`https://maximilianomoreno-lopez.github.io/estrelladelrif/`, son dos cambios: borrar
+`public/CNAME` y añadir `env: GH_SUBPATH: '1'` al paso *Build* del workflow. **Ninguna
+página depende del modo**: los enlaces internos pasan por `${base}` y las URL absolutas
+(canonical, Open Graph, JSON-LD, sitemap, robots.txt, manifest y llms.txt) se derivan de
+`src/lib/urls.ts`.
 
-### Cambiar al dominio propio
-
-Cuando el dominio esté registrado y el DNS apuntando a GitHub Pages:
-
-1. Crear `public/CNAME` con una sola línea: `estrelladelrif.eu`.
-2. Quitar el bloque `env: GH_SUBPATH: '1'` del paso *Build* en
-   `.github/workflows/deploy.yml`.
-3. En **Settings → Pages**, poner el dominio propio y activar *Enforce HTTPS*.
-
-No hay que tocar ninguna página: todos los enlaces internos pasan por
-`${base}` y las URL absolutas (canonical, Open Graph, JSON-LD, sitemap, robots.txt,
-manifest y llms.txt) se derivan de `src/lib/urls.ts`.
-
-DNS del dominio, en el registrador:
+DNS del dominio, en Namecheap (Advanced DNS), ya configurado:
 
 | Tipo | Nombre | Valor |
 |---|---|---|
@@ -138,11 +129,11 @@ Qué requisito cubre cada página:
 | Transparencia económica | `/transparencia/` |
 | Sin publicidad ni contenido comercial | todo el sitio |
 | HTTPS | GitHub Pages con *Enforce HTTPS* |
-| Dominio propio | **pendiente**: registrar el dominio y seguir los tres pasos de arriba |
+| Dominio propio | `estrelladelrif.eu`, fijado en `public/CNAME` |
 
-Pasos que quedan por hacer fuera de este repositorio: registrar `estrelladelrif.eu`,
-apuntar el DNS a GitHub Pages, validar la entidad ante el socio de TechSoup en España y
-verificar el dominio en Google con el registro TXT que facilite la consola.
+Pasos que quedan por hacer fuera de este repositorio: validar la entidad ante el socio de
+TechSoup en España y verificar el dominio en Google añadiendo en Namecheap el registro TXT
+que facilite la consola.
 
 ## Licencia y créditos
 
