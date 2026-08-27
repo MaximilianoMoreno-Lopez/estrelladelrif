@@ -38,7 +38,10 @@ export default defineConfig({
 
   integrations: [
     sitemap({
-      filter: (page) => !page.endsWith('/404/'),
+      // Fuera del sitemap: la 404 y las tres rutas que no son paginas sino
+      // ficheros de texto generados (llms.txt, robots.txt, site.webmanifest).
+      filter: (page) =>
+        !/\/(404|llms\.txt|robots\.txt|site\.webmanifest)\/?$/.test(page),
       changefreq: 'monthly',
       priority: 0.7,
       serialize(item) {

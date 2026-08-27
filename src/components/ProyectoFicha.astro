@@ -15,6 +15,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Bitacora from './Bitacora.astro';
 import EUBanner from './EUBanner.astro';
 import { site } from '../data/site';
+import { idOrg } from '../lib/urls';
 import type { Proyecto } from '../data/proyectos';
 
 interface Props {
@@ -87,7 +88,7 @@ const jsonLd = {
   endDate: proyecto.fin,
   inLanguage: 'es-ES',
   about: proyecto.temas,
-  provider: { '@id': `${site.url}/#org` },
+  provider: { '@id': idOrg() },
   funder: {
     '@type': 'GovernmentOrganization',
     name: 'INJUVE — Instituto de la Juventud, Agencia Nacional Española de la Juventud',

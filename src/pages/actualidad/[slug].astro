@@ -4,6 +4,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import EUBanner from '../../components/EUBanner.astro';
 import Picture from '../../components/Picture.astro';
 import { site } from '../../data/site';
+import { idOrg, idWeb } from '../../lib/urls';
 import { etiquetaTipo as etiquetaDeTipo } from '../../lib/noticias';
 
 export async function getStaticPaths() {
@@ -110,9 +111,9 @@ const articleJsonLd = {
   articleSection: etiquetaTipo,
   // Autoria y edicion apuntan al nodo NGO que ya inyecta el layout con @id fijo,
   // en vez de repetir nombre y logotipo: una sola entidad en el grafo.
-  author: { '@id': `${site.url}/#org` },
-  publisher: { '@id': `${site.url}/#org` },
-  isPartOf: { '@id': `${site.url}/#website` },
+  author: { '@id': idOrg() },
+  publisher: { '@id': idOrg() },
+  isPartOf: { '@id': idWeb() },
   mainEntityOfPage: { '@type': 'WebPage', '@id': `${site.url}${ruta}` },
   ...(location ? { contentLocation: { '@type': 'Place', name: location } } : {}),
 };

@@ -64,14 +64,22 @@ npm run webp       # solo el pipeline de imágenes
 
 ## Despliegue
 
-Push a `main` → `.github/workflows/deploy.yml` construye y publica (~2 min).
-En Settings → Pages: Source `GitHub Actions`, dominio propio `estrelladelrif.eu`
-(fijado en `public/CNAME`), Enforce HTTPS activado.
+Push a `main` → `.github/workflows/deploy.yml` comprueba tipos, construye y publica
+(~2 min). Settings → Pages: Source `GitHub Actions`.
 
-Mientras el DNS de `estrelladelrif.eu` no apunte a GitHub Pages, el sitio se puede
-construir para el subdirectorio de Pages con `GH_SUBPATH=1 npm run build`. Por eso todos
-los enlaces internos pasan por `${base}`: sin esa convención habría que reescribirlos al
-migrar.
+**Hoy el sitio vive en un subdirectorio**:
+`https://maximilianomoreno-lopez.github.io/estrelladelrif/`. El dominio propio no está
+registrado todavía, así que el workflow construye con `GH_SUBPATH: '1'`. Localmente:
+`GH_SUBPATH=1 npm run build`.
+
+El día que el dominio esté listo, el cambio son tres pasos (crear `public/CNAME`, quitar
+el `env` del paso Build, poner el dominio en Settings → Pages) y **ninguna página se
+toca**: los enlaces internos pasan por `${base}` y las URL absolutas salen de
+`src/lib/urls.ts`. El procedimiento completo está en el README.
+
+`robots.txt`, `site.webmanifest` y `llms.txt` **no son ficheros de `public/`**: son rutas
+generadas en `src/pages/`, porque los tres contienen URL absolutas o prefijos de ruta y
+un fichero de `public/` se copia tal cual.
 
 ## Publicar contenido
 

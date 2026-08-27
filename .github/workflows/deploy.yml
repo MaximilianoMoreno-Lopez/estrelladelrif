@@ -33,6 +33,15 @@ jobs:
         run: npx astro check
       - name: Build
         run: npm run build
+        env:
+          # PASO PENDIENTE: quitar estas dos lineas y crear public/CNAME con
+          # `estrelladelrif.eu` en cuanto el dominio este registrado y su DNS
+          # apunte a GitHub Pages (registros en el README). Hasta entonces el
+          # sitio se sirve en
+          # https://maximilianomoreno-lopez.github.io/estrelladelrif/ y necesita
+          # el prefijo de ruta; todos los enlaces internos pasan por ${base}
+          # justamente para que el cambio sea de una linea.
+          GH_SUBPATH: '1'
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

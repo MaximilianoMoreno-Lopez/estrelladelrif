@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { site } from '../data/site';
+import { idOrg, idWeb } from '../lib/urls';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
@@ -82,10 +83,10 @@ const jsonLd = {
   url: `${site.url}/contacto/`,
   name: `Contacto | ${site.name}`,
   inLanguage: 'es-ES',
-  isPartOf: { '@id': `${site.url}/#website` },
-  about: { '@id': `${site.url}/#org` },
+  isPartOf: { '@id': idWeb() },
+  about: { '@id': idOrg() },
   mainEntity: {
-    '@id': `${site.url}/#org`,
+    '@id': idOrg(),
     contactPoint: {
       '@type': 'ContactPoint',
       contactType: 'Información general',

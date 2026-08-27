@@ -5,6 +5,7 @@ import '../styles/global.css';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 import { site } from '../data/site';
+import { raizSitio } from '../lib/urls';
 
 interface Props {
   title: string;
@@ -43,6 +44,9 @@ const canonicalURL = new URL(Astro.url.pathname, siteOrigin);
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const ogImageURL = new URL(`${base}${ogImage}`, siteOrigin).href;
 
+// Raiz real del sitio en este despliegue; el por que esta en src/lib/urls.ts.
+const raiz = raizSitio();
+
 const breadcrumbJsonLd =
   breadcrumbs && breadcrumbs.length > 0
     ? {
@@ -66,13 +70,13 @@ const breadcrumbJsonLd =
 const orgNode = {
   '@context': 'https://schema.org',
   '@type': 'NGO',
-  '@id': `${site.url}/#org`,
+  '@id': `${raiz}/#org`,
   name: site.name,
   legalName: site.legalName,
   alternateName: site.acronym,
-  url: `${site.url}/`,
-  logo: `${site.url}/favicon-512x512.png`,
-  image: `${site.url}${site.ogImage}`,
+  url: `${raiz}/`,
+  logo: `${raiz}/favicon-512x512.png`,
+  image: `${raiz}${site.ogImage}`,
   email: site.email,
   telephone: site.phoneHref,
   taxID: site.nif,
@@ -110,10 +114,10 @@ const orgNode = {
 const websiteNode = {
   '@context': 'https://schema.org',
   '@type': 'WebSite',
-  '@id': `${site.url}/#website`,
-  url: `${site.url}/`,
+  '@id': `${raiz}/#website`,
+  url: `${raiz}/`,
   name: site.name,
-  publisher: { '@id': `${site.url}/#org` },
+  publisher: { '@id': `${raiz}/#org` },
   inLanguage: 'es-ES',
 };
 
