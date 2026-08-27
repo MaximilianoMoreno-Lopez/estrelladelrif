@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { site } from '../data/site';
+import { dominioActual } from '../lib/urls';
 import { LEGAL_VERSION, LEGAL_VERSION_LABEL } from '../lib/legal.js';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -15,7 +16,7 @@ const secciones = [
   {
     h: '1. Titularidad del sitio web',
     p: [
-      `En cumplimiento del deber de información de la Ley 34/2002, de 11 de julio, de servicios de la sociedad de la información y de comercio electrónico (LSSI-CE), se hace constar que este sitio web, publicado en el dominio <strong>${site.domain}</strong>, es titularidad de la asociación <strong>${site.legalName}</strong>, entidad juvenil sin ánimo de lucro constituida en ${site.founded}, con NIF ${site.nif} y domicilio en ${sede}.`,
+      `En cumplimiento del deber de información de la Ley 34/2002, de 11 de julio, de servicios de la sociedad de la información y de comercio electrónico (LSSI-CE), se hace constar que este sitio web, publicado en <strong>${dominioActual()}</strong>, es titularidad de la asociación <strong>${site.legalName}</strong>, entidad juvenil sin ánimo de lucro constituida en ${site.founded}, con NIF ${site.nif} y domicilio en ${sede}.`,
       `Correo de contacto: ${correo}. Teléfono: <a href="tel:${site.phoneHref}">${site.phone}</a>. Código de organización Erasmus+ (OID): ${site.oid}.`,
     ],
   },

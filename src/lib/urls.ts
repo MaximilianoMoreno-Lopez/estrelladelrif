@@ -30,3 +30,15 @@ export function idOrg(): string {
 export function idWeb(): string {
   return `${raizSitio()}/#website`;
 }
+
+/**
+ * Host, con prefijo de ruta si lo hay, donde el sitio esta publicado de verdad.
+ *
+ * Lo usan el aviso legal de la LSSI y la ficha de transparencia. Escribir ahi
+ * site.domain seria declarar como propio un dominio que todavia no esta
+ * registrado, que es exactamente el tipo de afirmacion que una pagina de
+ * transparencia no puede permitirse.
+ */
+export function dominioActual(): string {
+  return raizSitio().replace(/^https?:\/\//, '');
+}

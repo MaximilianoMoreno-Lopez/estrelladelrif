@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { site } from '../data/site';
+import { dominioActual } from '../lib/urls';
 import { democraciaSinBarreras, melillaIsEurope } from '../data/proyectos';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -32,7 +33,7 @@ const identificacion: {
   { etiqueta: 'Ámbito de actuación', valor: `${site.address.region} (España)` },
   { etiqueta: 'Correo electrónico', valor: site.email, tipo: 'email' },
   { etiqueta: 'Teléfono', valor: site.phone, tipo: 'telefono' },
-  { etiqueta: 'Sitio web', valor: site.domain },
+  { etiqueta: 'Sitio web', valor: dominioActual() },
 ];
 
 const junta = [

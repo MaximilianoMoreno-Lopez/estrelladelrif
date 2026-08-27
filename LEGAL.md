@@ -32,6 +32,17 @@ Si hay que corregir el texto el mismo día de una publicación anterior, se aña
 - [ ] `npm run build` sin errores.
 - [ ] Push a `main`.
 
+## Un texto legal que depende del despliegue
+
+El aviso de la LSSI en `/terminos/` nombra el dominio donde el sitio está publicado, y
+ese dato no se escribe a mano: sale de `dominioActual()` en `src/lib/urls.ts`. Es la
+única frase de los textos legales que cambia sin que nadie edite la página, y cambiará
+sola el día que se active el dominio propio.
+
+Cuando eso pase, hay que subir `LEGAL_VERSION` en el mismo commit que active el dominio
+(el que crea `public/CNAME` y quita `GH_SUBPATH` del workflow), porque el texto vigente
+para el público habrá cambiado aunque el fichero de la página no.
+
 ## Qué NO va en estas páginas
 
 Ni datos personales de miembros o participantes, ni promesas de tratamiento de datos que
