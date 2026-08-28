@@ -69,6 +69,17 @@
   --shadow-md:   0 4px 12px rgba(20,38,63,.1), 0 2px 6px rgba(20,38,63,.07);
   --shadow-lg:   0 10px 30px rgba(20,38,63,.12), 0 4px 12px rgba(20,38,63,.08);
   --shadow-card: 0 2px 8px rgba(20,38,63,.06), 0 8px 24px rgba(20,38,63,.06);
+
+  /* Trama de fondo para las superficies oscuras. El motivo es el octagrama de la
+     marca, o sea los dos cuadrados girados 45 grados, en retícula de 112 px. Va
+     como data URI y no como fichero de public/ para no anadir una peticion y
+     para que cualquier bloque oscuro pueda usarla con una linea.
+
+     Existe porque la asociacion no tiene ni una fotografia propia: los proyectos
+     empiezan en el verano de 2026. Sin imagenes, los bloques oscuros eran planos
+     y la mitad derecha de los heroes quedaba vacia. La trama da textura sin
+     inventar una foto de banco que contradiga el tono. */
+  --trama: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='112' height='112' viewBox='0 0 112 112'%3E%3Cg fill='none' stroke='%23e0a428' stroke-width='1'%3E%3Crect x='40' y='40' width='32' height='32'/%3E%3Crect x='40' y='40' width='32' height='32' transform='rotate(45 56 56)'/%3E%3C/g%3E%3C/svg%3E");
 }
 
 /* ─── Reset ──────────────────────────────────────────── */
@@ -309,6 +320,20 @@ h1, h2, h3, h4, h5 {
    seccion que visualmente no lo necesita. No se usa display:none ni
    visibility:hidden porque ambos sacan el texto tambien del arbol de
    accesibilidad, que es justo lo contrario de lo que se busca. */
+.trama-suave {
+  position: relative;
+}
+.trama-suave::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--trama);
+  opacity: 0.06;
+  mask-image: linear-gradient(#000, transparent 70%);
+  -webkit-mask-image: linear-gradient(#000, transparent 70%);
+  pointer-events: none;
+}
+
 .solo-lectores {
   position: absolute;
   width: 1px;
@@ -364,6 +389,22 @@ main.con-migas .page-hero { padding-top: 2.5rem; }
   padding: 9rem 0 5rem;
   position: relative;
   overflow: hidden;
+}
+.page-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: var(--trama);
+  /* La trama se desvanece hacia la izquierda para no competir con el texto, que
+     siempre empieza ahi. El degradado de mascara es el mismo en los dos ejes
+     para que el motivo no se corte en seco contra el borde. */
+  /* Muy tenue a proposito. Una primera version iba a 0.16 con reticula de 72 px
+     y el resultado leia como papel pintado: competia con el titular y con la
+     filigrana del hero. La textura tiene que notarse solo cuando se busca. */
+  opacity: 0.07;
+  mask-image: linear-gradient(100deg, transparent 26%, #000 82%);
+  -webkit-mask-image: linear-gradient(100deg, transparent 26%, #000 82%);
+  pointer-events: none;
 }
 .page-hero::after {
   content: '';
