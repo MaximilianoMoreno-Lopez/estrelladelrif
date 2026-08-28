@@ -126,13 +126,17 @@ const og = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" vi
   <rect width="1200" height="630" fill="url(#fondo)"/>
   <rect width="1200" height="630" fill="url(#brillo)"/>
 
-  <!-- La marca ocupa 64x64 en su lienzo original; a escala 4.6 mide 294 px y
-       centrada verticalmente arranca en y = (630 - 294) / 2 = 168, mas 22 de ajuste optico. -->
-  <g transform="translate(104, 190) scale(4.6)">${marcaClara}</g>
+  <!-- La marca ocupa 64x64 en su lienzo original, pero su tinta no llena el
+       lienzo: va de x=17.8 a x=46.2 y de y=5.8 a y=57.6. A escala 5.4 eso son
+       153 x 280 px, asi que para centrar la tinta verticalmente el grupo arranca
+       en y = 315 - 5.8*5.4 - 280/2 = 144, y para dejar 150 px de margen
+       izquierdo, en x = 150 - 17.8*5.4 = 54. Se posiciona por la tinta y no por
+       el lienzo porque si no la marca se va visualmente hacia arriba. -->
+  <g transform="translate(54, 144) scale(5.4)">${marcaClara}</g>
 
-  <text x="450" y="307" font-family="Playfair Display, Georgia, serif" font-size="82" font-weight="700" fill="#ffffff">Estrella del Rif</text>
-  <text x="453" y="367" font-family="DM Sans, Arial, sans-serif" font-size="32" fill="${ORO}" letter-spacing="1.4">Melilla &#183; Juventud &#183; Europa</text>
-  <text x="453" y="424" font-family="DM Sans, Arial, sans-serif" font-size="26" fill="#c9d2e0">Asociaci&#243;n juvenil &#183; Educaci&#243;n no formal &#183; Erasmus+</text>
+  <text x="400" y="307" font-family="Playfair Display, Georgia, serif" font-size="82" font-weight="700" fill="#ffffff">Estrella del Rif</text>
+  <text x="403" y="367" font-family="DM Sans, Arial, sans-serif" font-size="32" fill="${ORO}" letter-spacing="1.4">Melilla &#183; Juventud &#183; Europa</text>
+  <text x="403" y="424" font-family="DM Sans, Arial, sans-serif" font-size="26" fill="#c9d2e0">Asociaci&#243;n juvenil &#183; Educaci&#243;n no formal &#183; Erasmus+</text>
 </svg>`;
 
 await sharp(Buffer.from(og)).png({ compressionLevel: 9 }).toFile(p('public/og-image.png'));
