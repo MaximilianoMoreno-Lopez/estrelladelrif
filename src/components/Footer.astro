@@ -32,9 +32,6 @@ const year = new Date().getFullYear();
           Educación no formal, participación democrática, inclusión y oportunidades
           europeas para la juventud de la ciudad.
         </p>
-        <p class="footer-legal-datos">
-          NIF {site.nif} · OID Erasmus+ {site.oid}
-        </p>
       </div>
 
       <nav class="footer-col" aria-label="Navegación del pie">
@@ -75,6 +72,35 @@ const year = new Date().getFullYear();
           </ul>
         )}
       </div>
+    </div>
+
+    {/* Banda de identificacion, en todas las paginas. No es adorno legal: es lo
+        que comprueba quien valida a la entidad (Google for Nonprofits, TechSoup,
+        una agencia nacional) y lo que busca cualquiera que quiera saber a quien
+        esta leyendo. Los identificadores que no existen todavia no se pintan, en
+        vez de aparecer vacios o como "pendiente". */}
+    <div class="footer-credenciales">
+      <p>
+        <span>Asociación juvenil sin ánimo de lucro (Ley Orgánica 1/2002)</span>
+        <span class="sep" aria-hidden="true">·</span>
+        <span><strong>NIF / Tax ID</strong>: {site.nif}</span>
+        {site.registro.numero && (
+          <>
+            <span class="sep" aria-hidden="true">·</span>
+            <span>{site.registro.nombre} n.º {site.registro.numero}</span>
+          </>
+        )}
+        <span class="sep" aria-hidden="true">·</span>
+        <span><strong>OID Erasmus+</strong>: {site.oid}</span>
+        {site.pic && (
+          <>
+            <span class="sep" aria-hidden="true">·</span>
+            <span><strong>PIC</strong>: {site.pic}</span>
+          </>
+        )}
+        <span class="sep" aria-hidden="true">·</span>
+        <span>Sede en {site.address.city}, España</span>
+      </p>
     </div>
 
     <div class="footer-barra">
@@ -121,10 +147,26 @@ const year = new Date().getFullYear();
     max-width: 40ch;
     line-height: 1.7;
   }
-  .footer-legal-datos {
-    margin-top: 1rem;
-    font-size: 0.82rem;
-    color: rgba(255, 255, 255, 0.55);
+  .footer-credenciales {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .footer-credenciales p {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+    /* .72 sobre el indigo del pie da 6,1:1, de sobra para texto pequeno. */
+    color: rgba(255, 255, 255, 0.72);
+  }
+  .footer-credenciales strong {
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  .footer-credenciales .sep {
+    color: rgba(255, 255, 255, 0.4);
   }
 
   .footer-col h2 {
@@ -164,8 +206,8 @@ const year = new Date().getFullYear();
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 0.5rem;
-    margin-top: 3rem;
-    padding-top: 1.5rem;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     font-size: 0.82rem;
     color: rgba(255, 255, 255, 0.55);

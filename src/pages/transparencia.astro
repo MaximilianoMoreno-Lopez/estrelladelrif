@@ -20,12 +20,26 @@ const identificacion: {
   {
     etiqueta: 'Naturaleza jurídica',
     valor:
-      'Asociación juvenil sin ánimo de lucro, constituida en ' +
+      'Asociación juvenil sin ánimo de lucro al amparo de la Ley Orgánica 1/2002, de 22 ' +
+      'de marzo, reguladora del derecho de asociación. Constituida en ' +
       site.founded +
       '. No es un organismo público ni depende de ninguna administración.',
   },
-  { etiqueta: 'NIF', valor: site.nif },
-  { etiqueta: 'OID Erasmus+', valor: site.oid },
+  // La doble denominacion es deliberada: quien revisa una solicitud de Google
+  // for Nonprofits o de TechSoup busca un "Charity ID" o un "Tax ID" y en Espana
+  // ese numero es el NIF de la asociacion, no existe otro. Con la etiqueta a
+  // secas hay que explicarlo por correo.
+  { etiqueta: 'NIF (Charity ID / Tax ID)', valor: site.nif },
+  ...(site.registro.numero
+    ? [
+        {
+          etiqueta: 'Inscripción registral',
+          valor: `${site.registro.nombre}, n.º ${site.registro.numero}`,
+        },
+      ]
+    : []),
+  { etiqueta: 'OID Erasmus+ (Organisation ID)', valor: site.oid },
+  ...(site.pic ? [{ etiqueta: 'PIC (Participant Identification Code)', valor: site.pic }] : []),
   {
     etiqueta: 'Domicilio social',
     valor: `${site.address.street}, ${site.address.postalCode} ${site.address.city}`,
@@ -176,6 +190,42 @@ const asuntoDocs = encodeURIComponent('Consulta sobre documentación institucion
         incorporación a los fondos europeos: los dos proyectos de la convocatoria 2026 son
         los primeros que gestiona.
       </p>
+
+      {/* Resumen en ingles de los datos de arriba. Esta pagina esta en espanol,
+          pero quien valida una solicitud de Google for Nonprofits, de TechSoup o
+          de un programa europeo no siempre lee espanol, y lo que necesita
+          comprobar es siempre lo mismo: que la entidad esta inscrita, que es sin
+          animo de lucro, cual es su numero fiscal, donde tiene su sede y que el
+          dominio es de la propia organizacion. Tenerlo en un solo parrafo
+          localizable evita el ida y vuelta de peticiones de aclaracion. */}
+      <div class="declaracion fade-in">
+        <h3 lang="en">Organisation details (English)</h3>
+        <p lang="en">
+          {site.legalName} is a non-profit youth association established in {site.founded} and
+          based in {site.address.city}, Spain, incorporated under Spanish Organic Law 1/2002
+          on the right of association. It is a private organisation: it is not a public body
+          and it is not part of, nor controlled by, any public administration.
+          {' '}Charity ID / Tax ID (NIF): <strong>{site.nif}</strong>.
+          {site.registro.numero && (
+            <>
+              {' '}Registered with the {site.registro.nombre} under number{' '}
+              <strong>{site.registro.numero}</strong>.
+            </>
+          )}
+          {' '}Erasmus+ Organisation ID (OID): <strong>{site.oid}</strong>.
+          {site.pic && <> Participant Identification Code (PIC): <strong>{site.pic}</strong>.</>}
+          {' '}Registered office: {site.address.street}, {site.address.postalCode}{' '}
+          {site.address.city}, Spain.
+        </p>
+        <p lang="en">
+          This website, <strong>{site.domain}</strong>, is the official domain owned and
+          operated by the organisation. It carries no advertising and runs no third-party
+          tracking. The organisation is represented by its President,
+          {' '}{junta[0].nombre}, and its Vice-President, {junta[1].nombre}. Enquiries and
+          requests for documentation:{' '}
+          <a href={`mailto:${site.email}`}>{site.email}</a>.
+        </p>
+      </div>
     </div>
   </section>
 
@@ -650,6 +700,44 @@ const asuntoDocs = encodeURIComponent('Consulta sobre documentación institucion
     line-height: 1.65;
   }
   .nota a {
+    color: var(--terracota-texto);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* Bloque en ingles. Se diferencia con una tarjeta y un filete lateral para que
+     se localice de un vistazo al llegar a la pagina buscando exactamente esto,
+     no para destacarlo por encima del contenido en espanol. */
+  .declaracion {
+    margin-top: 2.5rem;
+    padding: 1.5rem 1.75rem;
+    background: var(--white);
+    border: 1px solid var(--linea);
+    border-left: 3px solid var(--oro);
+    border-radius: var(--radius-md);
+  }
+  .declaracion h3 {
+    font-size: 0.78rem;
+    font-family: 'DM Sans Variable', 'DM Sans', 'DM Sans Fallback', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--tinta-tenue);
+    margin-bottom: 0.9rem;
+  }
+  .declaracion p {
+    font-size: 0.92rem;
+    line-height: 1.7;
+    color: var(--tinta-suave);
+  }
+  .declaracion p + p {
+    margin-top: 0.9rem;
+  }
+  .declaracion strong {
+    color: var(--indigo);
+    font-weight: 600;
+  }
+  .declaracion a {
     color: var(--terracota-texto);
     text-decoration: underline;
     text-underline-offset: 3px;

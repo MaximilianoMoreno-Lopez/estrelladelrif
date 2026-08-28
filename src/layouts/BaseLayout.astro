@@ -104,9 +104,23 @@ const orgNode = {
     'Inclusión de personas con discapacidad',
     'Alfabetización mediática',
   ],
+  // `propertyID` y no `name`: es la propiedad que schema.org define para decir
+  // de que sistema de identificacion se trata, y la que leen los consumidores de
+  // datos estructurados. Con `name` el numero se publica pero sin declarar que
+  // es. Se anaden solo los identificadores que existen de verdad.
   identifier: [
-    { '@type': 'PropertyValue', name: 'NIF', value: site.nif },
-    { '@type': 'PropertyValue', name: 'OID Erasmus+', value: site.oid },
+    { '@type': 'PropertyValue', propertyID: 'NIF', value: site.nif },
+    { '@type': 'PropertyValue', propertyID: 'Erasmus+ OID', value: site.oid },
+    ...(site.pic ? [{ '@type': 'PropertyValue', propertyID: 'PIC', value: site.pic }] : []),
+    ...(site.registro.numero
+      ? [
+          {
+            '@type': 'PropertyValue',
+            propertyID: site.registro.nombre ?? 'Registro de asociaciones',
+            value: site.registro.numero,
+          },
+        ]
+      : []),
   ],
   ...(site.socials.length > 0 ? { sameAs: site.socials.map((r) => r.url) } : {}),
 };

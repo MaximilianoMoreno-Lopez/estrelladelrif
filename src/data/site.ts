@@ -34,10 +34,36 @@ export const site = {
   domain: 'estrelladelrif.eu',
   url: 'https://estrelladelrif.eu',
 
-  // Datos registrales. Se publican en /transparencia/ y /contacto/ y alimentan
-  // el nodo JSON-LD de la organizacion.
+  // Identificacion fiscal y registral. Se publica en /transparencia/, en el pie
+  // de todas las paginas y en el nodo JSON-LD de la organizacion.
+  //
+  // El NIF es, ademas, el numero que Google for Nonprofits y TechSoup piden como
+  // "Charity ID" o "Tax ID". En Espana no existe un numero de entidad benefica
+  // distinto del NIF: quien revisa la solicitud busca un "non-profit
+  // registration number" y lo que hay que darle es este. Por eso la etiqueta de
+  // /transparencia/ lleva las dos denominaciones y el parrafo en ingles de esa
+  // misma pagina lo declara explicitamente; si no, la solicitud se para con una
+  // peticion de aclaracion.
   nif: 'G23831845',
+
+  // OID de Erasmus+ (Organisation ID), el identificador con el que la Comision
+  // Europea reconoce a la entidad en el programa.
   oid: 'E10411785',
+
+  // PIC (Participant Identification Code): el PIF de la asociacion lo deja en
+  // blanco, asi que no consta. En cuanto exista, aqui, y aparece solo en las
+  // tres plantillas que lo consultan.
+  pic: null as string | null,
+
+  // Inscripcion en el registro de asociaciones. PENDIENTE de que la asociacion
+  // facilite el registro concreto y el numero de inscripcion. Es el dato que
+  // TechSoup pide para validar la entidad y el que Ad Grants espera ver
+  // publicado, asi que en cuanto llegue se rellena aqui y aparece solo en
+  // /transparencia/, en el pie y en el JSON-LD.
+  registro: {
+    nombre: null as string | null,
+    numero: null as string | null,
+  },
   address: {
     street: 'Calle Dolores Carmona Román, 18, 7.º A',
     postalCode: '52002',
