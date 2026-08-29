@@ -45,6 +45,10 @@ const identificacion: {
     valor: `${site.address.street}, ${site.address.postalCode} ${site.address.city}`,
   },
   { etiqueta: 'Ámbito de actuación', valor: `${site.address.region} (España)` },
+  {
+    etiqueta: 'Pertenencia',
+    valor: `Organización miembro de la ${site.federacion.nombre} desde ${site.federacion.desde}`,
+  },
   { etiqueta: 'Correo electrónico', valor: site.email, tipo: 'email' },
   { etiqueta: 'Teléfono', valor: site.phone, tipo: 'telefono' },
   { etiqueta: 'Sitio web', valor: dominioActual() },
@@ -214,6 +218,8 @@ const asuntoDocs = encodeURIComponent('Consulta sobre documentación institucion
           )}
           {' '}Erasmus+ Organisation ID (OID): <strong>{site.oid}</strong>.
           {site.pic && <> Participant Identification Code (PIC): <strong>{site.pic}</strong>.</>}
+          {' '}Member organisation of the {site.federacion.nombre} (
+          <a href={site.federacion.url} rel="noopener">estrellaseuropa.eu</a>).
           {' '}Registered office: {site.address.street}, {site.address.postalCode}{' '}
           {site.address.city}, Spain.
         </p>

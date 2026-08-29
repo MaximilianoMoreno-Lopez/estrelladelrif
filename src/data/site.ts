@@ -78,6 +78,17 @@ export const site = {
   phone: '+34 666 028 511',
   phoneHref: '+34666028511',
 
+  // Federacion a la que pertenece la asociacion. Se publica en el pie, en
+  // /sobre-nosotros/ y en /transparencia/, y alimenta el `memberOf` del nodo
+  // JSON-LD, que es la contrapartida del `member[]` que declara la federacion en
+  // su propia web: con las dos mitades, buscadores y modelos resuelven la
+  // relacion en vez de tener que inferirla de un enlace suelto.
+  federacion: {
+    nombre: 'Federación Estrellas de Europa',
+    url: 'https://estrellaseuropa.eu',
+    desde: 2026,
+  },
+
   // Vacio a proposito hasta que la asociacion confirme los perfiles. En cuanto
   // haya alguno entra en el footer y en `sameAs` del JSON-LD sin tocar nada mas.
   socials: [] as RedSocial[],

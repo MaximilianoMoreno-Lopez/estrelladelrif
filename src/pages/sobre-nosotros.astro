@@ -352,6 +352,18 @@ const sede = `${site.address.street}, ${site.address.postalCode} ${site.address.
           <dt>Sede</dt>
           <dd>{sede}</dd>
         </div>
+        <div class="dato">
+          <dt>Pertenencia</dt>
+          <dd>
+            Organización miembro de la{' '}
+            <a href={site.federacion.url} rel="noopener">{site.federacion.nombre}</a>
+            {' '}desde {site.federacion.desde}.
+            <span class="dato-nota">
+              Federación de asociaciones juveniles españolas comprometidas con la
+              movilidad europea y el aprendizaje no formal.
+            </span>
+          </dd>
+        </div>
       </dl>
 
       <div class="datos-enlaces fade-in">

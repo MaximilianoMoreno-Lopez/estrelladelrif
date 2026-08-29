@@ -95,6 +95,11 @@ const orgNode = {
     addressCountry: site.address.country,
   },
   areaServed: { '@type': 'AdministrativeArea', name: 'Melilla' },
+  memberOf: {
+    '@type': 'Organization',
+    name: site.federacion.nombre,
+    url: site.federacion.url,
+  },
   knowsAbout: [
     'Educación no formal',
     'Participación juvenil',
