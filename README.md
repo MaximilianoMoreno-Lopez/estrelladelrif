@@ -26,7 +26,7 @@ la vida democrática y acceda a las oportunidades europeas.
 public/
   CNAME                  dominio propio
   favicon.svg            marca para tamano pequeno (fuente)
-  images/logo.svg        marca principal (fuente): yaz tifinagh U+2D63 + estrella de 8 puntas
+  images/logo.svg        marca principal (fuente): yaz tifinagh U+2D63 + estrella de 6 puntas
   images/logo-claro.svg  variante para fondo oscuro (generada)
   og-image.png           imagen social 1200x630 (generada)
   favicon-*.png  apple-touch-icon.png  favicon.ico

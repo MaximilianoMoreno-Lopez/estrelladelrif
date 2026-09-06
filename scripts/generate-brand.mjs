@@ -34,9 +34,13 @@ const logoFuente = readFileSync(p('public/images/logo.svg'), 'utf8');
 const faviconSvg = readFileSync(p('public/favicon.svg'));
 
 // ─── Variante para fondo oscuro ────────────────────────────────────────────
-// Unico cambio: el arco pasa de indigo a blanco de cal. El zocalo de terracota
-// y la estrella de oro funcionan igual sobre claro y sobre oscuro.
-const logoClaro = logoFuente.replaceAll(`stroke="${INDIGO}"`, `stroke="${CAL}"`);
+// La marca es multicolor y tres de sus cuatro colores funcionan igual sobre
+// claro y sobre oscuro. El unico que no es el azul de la punta superior:
+// #0076ED sobre el indigo del fondo es azul oscuro sobre azul oscuro y la punta
+// se pierde. Se aclara solo ese, lo justo para que se despegue del fondo.
+const AZUL = '#0076ED';
+const AZUL_CLARO = '#3D9BFF';
+const logoClaro = logoFuente.replaceAll(`stroke="${AZUL}"`, `stroke="${AZUL_CLARO}"`);
 writeFileSync(p('public/images/logo-claro.svg'), logoClaro);
 console.log('images/logo-claro.svg');
 
@@ -111,6 +115,12 @@ console.log('images/logo-1024.png');
 // dia se quiere el tipo exacto habria que convertir el texto a trazados.
 // Los acentos van como entidades numericas para no depender de como interprete
 // librsvg la codificacion del buffer.
+// Tinta de la marca dentro de su lienzo de 64, para centrarla en la imagen social.
+const TINTA = { x0: 8.96, y0: 5.75, ancho: 46.08, alto: 52.5 };
+const OG_ESCALA = 4.6;
+const OG_X = +(150 - TINTA.x0 * OG_ESCALA).toFixed(1);               // 150 px de margen izquierdo
+const OG_Y = +(315 - TINTA.y0 * OG_ESCALA - (TINTA.alto * OG_ESCALA) / 2).toFixed(1);
+
 const og = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
     <linearGradient id="fondo" x1="0" y1="0" x2="1" y2="1">
@@ -127,12 +137,12 @@ const og = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" vi
   <rect width="1200" height="630" fill="url(#brillo)"/>
 
   <!-- La marca ocupa 64x64 en su lienzo original, pero su tinta no llena el
-       lienzo: va de x=17.8 a x=46.2 y de y=5.8 a y=57.6. A escala 5.4 eso son
-       153 x 280 px, asi que para centrar la tinta verticalmente el grupo arranca
-       en y = 315 - 5.8*5.4 - 280/2 = 144, y para dejar 150 px de margen
-       izquierdo, en x = 150 - 17.8*5.4 = 54. Se posiciona por la tinta y no por
-       el lienzo porque si no la marca se va visualmente hacia arriba. -->
-  <g transform="translate(54, 144) scale(5.4)">${marcaClara}</g>
+       lienzo: va de x=8.96 a x=55.04 y de y=5.75 a y=58.25, contando el saliente
+       del inglete de las puntas. Se posiciona por la tinta y no por el lienzo,
+       porque si no la marca se va visualmente hacia arriba. La escala bajo de
+       5.4 a 4.6 al cambiar la marca: la estrella de seis puntas es mucho mas
+       ancha que el yaz suelto y a 5.4 se comia el margen del titulo. -->
+  <g transform="translate(${OG_X}, ${OG_Y}) scale(${OG_ESCALA})">${marcaClara}</g>
 
   <text x="400" y="307" font-family="Playfair Display, Georgia, serif" font-size="82" font-weight="700" fill="#ffffff">Estrella del Rif</text>
   <text x="403" y="367" font-family="DM Sans, Arial, sans-serif" font-size="32" fill="${ORO}" letter-spacing="1.4">Melilla &#183; Juventud &#183; Europa</text>

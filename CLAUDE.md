@@ -41,17 +41,23 @@ asoc.estrelladelrif@gmail.com · +34 666 028 511
 Junta: Mohamed Abdelkader Kichouh (presidente) · Pablo Sánchez Ruiz (vicepresidente)
 Colores: indigo #14263f · terracota #c0563a · oro #e0a428 · turquesa #2f8f89 · cal #f8f5ef
 Logo: public/images/logo.svg (fondo claro) y logo-claro.svg (fondo oscuro)
-Marca: yaz tifinagh U+2D63 sosteniendo una estrella de ocho puntas
+Marca: yaz tifinagh U+2D63 en rojo dentro de una estrella de seis puntas con los colores amazigh
 OG image: public/og-image.png
 ```
 
 ## Marca
 
-La marca es el **yaz** sosteniendo una **estrella de ocho puntas**. El yaz es la letra
+La marca es el **yaz** dentro de una **estrella de seis puntas**. El yaz es la letra
 tifinagh **U+2D63**, el símbolo de la identidad amazigh y del Rif, el mismo que ocupa el
 centro de la bandera amazigh: se dibuja tal cual es la letra, sin estilizar ni recortar.
-La estrella se apoya entre sus dos brazos levantados, de modo que la lectura es literal,
-«la estrella del Rif».
+Va en rojo, y las puntas de la estrella llevan los otros tres colores de la bandera
+amazigh, azul arriba, verde en los brazos altos y amarillo en los bajos y en la punta
+inferior. El significado lo llevan el símbolo y el color, no la decoración.
+
+La estrella no es un contorno cerrado: cada punta se dibuja como una V independiente,
+retranqueada en el vértice interior, y se recorta allí donde el yaz la cruza. Ese
+recorte no está dibujado a mano, sale de una máscara con el propio trazado del yaz
+engordado, así que al mover el yaz los huecos se recalculan solos.
 
 Los SVG fuente son `public/images/logo.svg` y `public/favicon.svg`. Todo lo demás
 (favicons PNG, `favicon.ico`, `apple-touch-icon`, `logo-claro.svg`, `logo-1024.png`,

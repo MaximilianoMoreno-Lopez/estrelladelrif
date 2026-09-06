@@ -1,41 +1,52 @@
 <!--
-  Marca de Estrella del Rif: el yaz sosteniendo una estrella de ocho puntas.
+  Marca de Estrella del Rif: el yaz amazigh dentro de una estrella de seis puntas.
 
-  El yaz es la letra tifinagh U+2D63 (TIFINAGH LETTER YAZ), el simbolo de la
-  identidad amazigh y del Rif, el mismo que ocupa el centro de la bandera
-  amazigh. Se dibuja tal cual es la letra: un tallo vertical, un arco que abre
-  hacia arriba en el borde superior y otro que abre hacia abajo en el inferior.
-  No se estiliza ni se recorta: es un simbolo cultural, no un adorno.
+  El yaz es la letra tifinagh U+2D63, el simbolo de la identidad amazigh y del
+  Rif, el mismo que ocupa el centro de la bandera amazigh. Va en rojo, como en
+  la bandera, y las puntas de la estrella llevan los otros tres colores: azul
+  arriba, verde en los brazos altos, amarillo en los bajos y en la punta
+  inferior. El significado lo llevan el simbolo y el color, no la decoracion.
 
-  La estrella de ocho puntas se apoya en el borde superior, entre los dos brazos
-  levantados del yaz. Ahi la lectura es literal, "la estrella del Rif": el
-  simbolo sostiene la estrella en vez de llevarla al lado. Es tambien lo unico
-  que se superpone al glifo, y solo la punta del tallo, que queda dentro del
-  abrazo de los brazos.
+  Geometria, para que la marca se pueda reeditar:
 
-  Geometria, porque sin ella la marca no se puede reeditar:
-
-  - Arcos: circunferencias de radio 12 centradas en (32, 13.4) y (32, 55.4). El
-    superior es la mitad inferior de su circunferencia y el inferior la mitad
-    superior, asi que cada uno abre en direccion contraria.
-  - Tallo: de (32, 13.4) a (32, 55.4).
-  - Estrella: octagrama exacto de dos cuadrados girados 45 grados, centro
-    (32, 13.4), radio exterior 7.6 y radio interior 7.6 x 0.76537, que es donde
-    se cruzan las aristas de los dos cuadrados.
-  - Todo el conjunto queda centrado en el lienzo: la tinta va de y=5.8 a y=57.6.
-
-  Version anterior: un arco de herradura con la estrella dentro. Se retiro a
-  peticion de la asociacion para poner en su lugar el simbolo rifeno.
+  - Estrella: hexagrama regular centrado en (32, 32), radio a las puntas
+    23.99 y radio a los vertices interiores 13.85 (= radio / raiz de 3).
+    Cada punta se dibuja como una V independiente, del vertice interior a la
+    punta y de vuelta al siguiente vertice, retranqueada 1.68 en cada
+    extremo: por eso el hexagono interior queda abierto y la estrella se lee
+    como seis brazos y no como un contorno cerrado.
+  - Yaz: arcos de radio 11.4 con una cuerda de 19.14
+    y una flecha de 5.21, con las bocas en y=20.03 y
+    y=43.97; el tallo une los fondos de las dos copas.
+  - Trazos: 2.26 en la estrella y 2.7 en el yaz. El yaz es
+    algo mas grueso a proposito, para que gane el centro.
 
   Colores literales y no variables CSS: este fichero se carga con <img> y a
   traves de <img> una hoja de estilos externa no lo alcanza.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Estrella del Rif">
-  <path d="M32 13.4 L32 55.4"
-        fill="none" stroke="#14263f" stroke-width="4.4" stroke-linecap="round"/>
-  <path d="M20 13.4 A12 12 0 0 0 44 13.4"
-        fill="none" stroke="#14263f" stroke-width="4.4" stroke-linecap="round"/>
-  <path d="M20 55.4 A12 12 0 0 1 44 55.4"
-        fill="none" stroke="#14263f" stroke-width="4.4" stroke-linecap="round"/>
-  <polygon fill="#e0a428" points="32.00,5.80 34.23,8.03 37.37,8.03 37.37,11.17 39.60,13.40 37.37,15.63 37.37,18.77 34.23,18.77 32.00,21.00 29.77,18.77 26.63,18.77 26.63,15.63 24.40,13.40 26.63,11.17 26.63,8.03 29.77,8.03"/>
+  <mask id="paso-del-yaz">
+    <rect width="64" height="64" fill="#fff"/>
+    <g fill="none" stroke="#000" stroke-width="4.54" stroke-linecap="round">
+  <path d="M22.43 20.03 A11.4 11.4 0 0 0 41.57 20.03"/>
+  <path d="M32 25.24 L32 38.76"/>
+  <path d="M22.43 43.97 A11.4 11.4 0 0 1 41.57 43.97"/>
+    </g>
+  </mask>
+  <g fill="none" stroke-width="2.26" stroke-linecap="butt" stroke-linejoin="miter" mask="url(#paso-del-yaz)">
+  <path d="M38.08 18.55 L32 8.01 L25.92 18.55" stroke="#0076ED"/>
+  <path d="M23.39 20.01 L11.23 20.01 L17.31 30.54" stroke="#58AF10"/>
+  <path d="M17.31 33.46 L11.23 43.99 L23.39 43.99" stroke="#FEC802"/>
+  <path d="M25.92 45.45 L32 55.99 L38.08 45.45" stroke="#FEC802"/>
+  <path d="M40.61 43.99 L52.77 43.99 L46.69 33.46" stroke="#FEC802"/>
+  <path d="M46.69 30.54 L52.77 20.01 L40.61 20.01" stroke="#58AF10"/>
+  </g>
+  <g fill="none" stroke-linecap="round">
+  <path d="M22.43 20.03 A11.4 11.4 0 0 0 41.57 20.03"
+        stroke="#DC0E1B" stroke-width="2.7"/>
+  <path d="M32 25.24 L32 38.76"
+        stroke="#DC0E1B" stroke-width="2.7"/>
+  <path d="M22.43 43.97 A11.4 11.4 0 0 1 41.57 43.97"
+        stroke="#DC0E1B" stroke-width="2.7"/>
+  </g>
 </svg>
