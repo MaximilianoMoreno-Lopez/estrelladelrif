@@ -50,8 +50,22 @@ const marcaClara = interior(logoClaro);
 
 // ─── Favicons PNG ──────────────────────────────────────────────────────────
 // 16/32/48 los pide el navegador, 96 lo usan algunos lectores de marcadores,
-// 180 es apple-touch-icon, 192/512 los exige site.webmanifest para instalar.
-for (const size of [16, 32, 48, 96, 192, 512]) {
+// 180 es apple-touch-icon, 192/512 se usan al instalar el sitio y como logo en
+// los datos estructurados.
+//
+// El favicon fuente no tiene fondo, que es lo que queda bien en la pestana.
+// Pero 192, 512 y el apple-touch-icon van a la pantalla de inicio y a los datos
+// estructurados, donde se espera una figura solida: iOS pinta de negro lo
+// transparente. A esos se les inyecta el zocalo de cal aqui, para no tener que
+// mantener un segundo SVG a mano.
+const conFondo = Buffer.from(
+  faviconSvg.toString().replace(
+    /(<svg[^>]*>)/,
+    `$1<rect width="64" height="64" rx="13" fill="${CAL}"/>`,
+  ),
+);
+
+for (const size of [16, 32, 48, 96]) {
   await sharp(faviconSvg, { density: 384 })
     .resize(size, size)
     .png({ compressionLevel: 9 })
@@ -59,11 +73,19 @@ for (const size of [16, 32, 48, 96, 192, 512]) {
   console.log(`favicon-${size}x${size}.png`);
 }
 
-await sharp(faviconSvg, { density: 384 })
+for (const size of [192, 512]) {
+  await sharp(conFondo, { density: 384 })
+    .resize(size, size)
+    .png({ compressionLevel: 9 })
+    .toFile(p(`public/favicon-${size}x${size}.png`));
+  console.log(`favicon-${size}x${size}.png (con fondo)`);
+}
+
+await sharp(conFondo, { density: 384 })
   .resize(180, 180)
   .png({ compressionLevel: 9 })
   .toFile(p('public/apple-touch-icon.png'));
-console.log('apple-touch-icon.png');
+console.log('apple-touch-icon.png (con fondo)');
 
 // favicon.ico. sharp no escribe ICO, pero un ICO puede contener PNG tal cual
 // (formato PNG-in-ICO, entendido por todo navegador desde IE11), asi que se

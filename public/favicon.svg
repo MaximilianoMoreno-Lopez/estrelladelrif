@@ -13,9 +13,20 @@
   A 16 px se lee como una estrella de colores con algo rojo dentro, y a partir
   de 24 se distingue el yaz entero. En pantallas de alta densidad, que son la
   mayoria, el navegador toma el icono de 32 y la marca se ve completa.
+
+  Sin fondo: la pestana clara del navegador ya es casi del color de la cal, asi
+  que el cuadrado no aportaba nada, y sobre pestana oscura la marca se sostiene
+  sola. El unico color que sufre sobre oscuro es el azul de la punta superior,
+  que se aclara con una consulta de medios dentro del propio SVG. Los iconos de
+  192 y 512 y el apple-touch-icon si llevan fondo, porque van a la pantalla de
+  inicio y a los datos estructurados, donde se espera una figura solida y iOS
+  pinta de negro lo transparente.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <rect width="64" height="64" rx="13" fill="#f8f5ef"/>
+  <style>
+    .azul { stroke: #0076ED; }
+    @media (prefers-color-scheme: dark) { .azul { stroke: #3D9BFF; } }
+  </style>
   <mask id="m">
   <rect width="64" height="64" fill="#fff"/>
   <g fill="none" stroke="#000" stroke-width="8.4" stroke-linecap="round">
@@ -25,7 +36,7 @@
   </g>
   </mask>
   <g fill="none" stroke-width="4.2" stroke-linecap="butt" mask="url(#m)">
-  <path d="M38.88 15.92 L32.00 4.00 L25.12 15.92" stroke="#0076ED"/>
+  <path d="M38.88 15.92 L32.00 4.00 L25.12 15.92" class="azul"/>
   <path d="M21.52 18.00 L7.75 18.00 L14.63 29.92" stroke="#58AF10"/>
   <path d="M14.63 34.08 L7.75 46.00 L21.52 46.00" stroke="#FEC802"/>
   <path d="M25.12 48.08 L32.00 60.00 L38.88 48.08" stroke="#FEC802"/>
