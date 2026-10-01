@@ -54,10 +54,8 @@ phase: 'Acuerdos y puesta en marcha'
 # OPCIONAL. Lugar concreto. Ciudad, o ciudad y espacio si aporta algo:
 # 'Melilla', 'En linea', 'Melilla, IES Leopoldo Queipo'.
 #
-# Ojo con los dos encuentros presenciales del KA154: la ciudad de cada uno esta
-# por confirmar (ver el comentario de cabecera de src/data/proyectos.ts), asi que
-# no se escribe aqui hasta que la asociacion la confirme. Mientras tanto, deja el
-# campo fuera o pon 'Espana, ciudad por confirmar'.
+# El KA154 tiene un solo encuentro presencial, en Getafe (el de Valencia se
+# elimino en el convenio, ver la cabecera de src/data/proyectos.ts).
 location: 'Melilla'
 
 # OPCIONAL. Resumen de una o dos frases. Es el texto que acompana al titulo en

@@ -15,16 +15,12 @@
 //     /transparencia/, que es donde tienen sentido y donde se leen junto al
 //     resto de la informacion economica de la asociacion.
 //
-// Y una tercera cosa que se retiro: la ciudad de los dos encuentros presenciales
-// del KA154. El propio formulario se contradice. Las tablas de flujos asignan
-// Madrid al YPEVM01 (25 y 26 de septiembre) y Valencia al YPEVM02 (27 y 28 de
-// noviembre); la narrativa de implicacion de responsables publicos dice lo
-// contrario, que la primera actividad presencial se celebra en Valencia con
-// diputadas de las Cortes Valencianas y la segunda en Madrid con un senador; y
-// la ficha del Ayuntamiento de Getafe habla de su papel en la segunda actividad
-// presencial facilitando espacios municipales. Hasta que la asociacion confirme
-// que ciudad corresponde a cada encuentro, las fechas se publican y la ciudad
-// queda como pendiente. Publicar una de las tres versiones habria sido inventar.
+// El KA154 se aprobo con un ajuste de la Agencia Nacional (convenio
+// 2026-1-ES02-KA154-YOU-000395885, presupuesto version 0003, 10/07/2026): la
+// duracion baja de 10 a 8 meses, se elimina la actividad A1 de Valencia y se
+// mantiene el encuentro A2 de Getafe por su vinculo con el Ayuntamiento, con 20
+// participantes con movilidad, 10 de ellos con menos oportunidades. Esta ficha
+// recoge ya el proyecto ajustado, no el de la solicitud.
 
 export interface Actividad {
   id: string;
@@ -99,11 +95,11 @@ export const democraciaSinBarreras: Proyecto = {
   convocatoria: 'Convocatoria 2026, ronda 1',
   agencia: 'INJUVE — Agencia Nacional Española de la Juventud (ES02)',
   inicio: '2026-08-01',
-  fin: '2027-05-31',
-  fechasLabel: 'Agosto de 2026 – mayo de 2027',
-  duracion: '10 meses',
+  fin: '2027-03-31',
+  fechasLabel: 'Agosto de 2026 – marzo de 2027',
+  duracion: '8 meses',
   estado: 'activo',
-  ambito: 'Nacional, con dos encuentros presenciales en España',
+  ambito: 'Nacional, con un encuentro presencial en Getafe',
   badge: 'KA154 · Participación juvenil',
   badgeColor: 'terracota',
   resumen:
@@ -142,34 +138,16 @@ export const democraciaSinBarreras: Proyecto = {
   ],
   actividades: [
     {
-      id: 'YPEVM01',
-      tipo: 'Encuentro presencial con movilidad',
-      titulo: 'Democracia accesible: comprender la participación política sin barreras',
-      lugar: 'España, ciudad por confirmar',
-      fechas: '25 y 26 de septiembre de 2026',
-      duracion: '2 días',
-      participantes: '30 participantes en el evento, 15 de ellos con menos oportunidades',
-      descripcion:
-        'Introduce a los jóvenes en el concepto de democracia inclusiva, permite ' +
-        'comprender las barreras reales que enfrentan las personas con discapacidad y ' +
-        'abre un primer espacio de reflexión conjunta. Incluye la bienvenida accesible ' +
-        'con un contrato de convivencia inclusiva coconstruido, la sesión ' +
-        '«¿Qué es la democracia accesible?», el taller «Tu voz en la democracia», la ' +
-        'actividad «El laberinto de las barreras», el «Mapa de la participación I», el ' +
-        'mini-taller de derechos políticos en lectura fácil y la co-creación del Diario ' +
-        'Político Inclusivo.',
-    },
-    {
       id: 'YPEVM02',
       tipo: 'Encuentro presencial con movilidad',
       titulo: 'Foro por la democracia inclusiva',
-      lugar: 'España, ciudad por confirmar',
+      lugar: 'Getafe (Madrid), con el Ayuntamiento de Getafe',
       fechas: '27 y 28 de noviembre de 2026',
       duracion: '2 días',
-      participantes: '30 participantes en el evento, 15 de ellos con menos oportunidades',
+      participantes: '20 participantes con movilidad desde los territorios de las entidades socias, 10 de ellos con menos oportunidades',
       descripcion:
         'Aplica todo lo aprendido para diseñar propuestas políticas accesibles y ' +
-        'presentarlas en un foro final. Incluye el «Mapa de la participación II», la ' +
+        'presentarlas en un foro final. Incluye el «Mapa de la participación», la ' +
         'sesión «Del diálogo a la incidencia», el taller «Tu ciudad, tú decides», la ' +
         'simulación «El ayuntamiento inclusivo», el taller «Comunica tu propuesta», el ' +
         'laboratorio «Accesibilizar un proceso democrático real» y la feria de ' +
@@ -220,17 +198,6 @@ export const democraciaSinBarreras: Proyecto = {
     },
     {
       mes: 'Mes 2',
-      titulo: 'Primer encuentro presencial',
-      objetivo:
-        'Comprender qué es la democracia accesible y qué barreras existen, y abrir el Diario Político Inclusivo.',
-      hitos: [
-        'Actividad presencial «Democracia accesible»',
-        'Mapa físico y digital accesible de espacios de participación',
-        'Guía breve de derechos democráticos en lectura fácil',
-      ],
-    },
-    {
-      mes: 'Mes 3',
       titulo: 'Reto cívico inclusivo',
       objetivo:
         'Contrastar la teoría con la práctica evaluando la accesibilidad de un pleno real.',
@@ -240,7 +207,7 @@ export const democraciaSinBarreras: Proyecto = {
       ],
     },
     {
-      mes: 'Mes 4',
+      mes: 'Mes 3',
       titulo: 'Talleres locales «Tu democracia cotidiana»',
       objetivo: 'Llevar el aprendizaje al territorio de cada entidad socia.',
       hitos: [
@@ -249,7 +216,7 @@ export const democraciaSinBarreras: Proyecto = {
       ],
     },
     {
-      mes: 'Mes 5',
+      mes: 'Mes 4',
       titulo: 'Observatorio Juvenil de Barreras y Soluciones',
       objetivo:
         'Convertir la evidencia recogida en recomendaciones listas para implementar.',
@@ -260,7 +227,7 @@ export const democraciaSinBarreras: Proyecto = {
       ],
     },
     {
-      mes: 'Mes 6',
+      mes: 'Mes 5',
       titulo: 'Escuela ciudadana online',
       objetivo:
         'Reforzar competencias cívicas y democráticas en un formato sin barreras.',
@@ -270,8 +237,8 @@ export const democraciaSinBarreras: Proyecto = {
       ],
     },
     {
-      mes: 'Mes 7',
-      titulo: 'Segundo encuentro presencial',
+      mes: 'Mes 6',
+      titulo: 'Encuentro presencial en Getafe',
       objetivo:
         'Diseñar propuestas políticas accesibles y presentarlas en el foro final.',
       hitos: [
@@ -281,7 +248,7 @@ export const democraciaSinBarreras: Proyecto = {
       ],
     },
     {
-      mes: 'Mes 8',
+      mes: 'Mes 7',
       titulo: 'Campañas «Tu voz cuenta»',
       objetivo: 'Sacar el mensaje del grupo y llevarlo a la comunidad.',
       hitos: [
@@ -290,16 +257,11 @@ export const democraciaSinBarreras: Proyecto = {
       ],
     },
     {
-      mes: 'Mes 9',
-      titulo: 'Red de asociaciones por la participación inclusiva',
-      objetivo: 'Garantizar que el trabajo continúe cuando el proyecto termine.',
-      hitos: ['Primera reunión anual de la red'],
-    },
-    {
-      mes: 'Mes 10',
-      titulo: 'Cierre y transferencia',
-      objetivo: 'Dejar los resultados documentados, accesibles y reutilizables.',
+      mes: 'Mes 8',
+      titulo: 'Cierre, transferencia y red',
+      objetivo: 'Dejar los resultados documentados, accesibles y reutilizables, y que el trabajo continúe cuando el proyecto termine.',
       hitos: [
+        'Primera reunión anual de la Red de asociaciones por la participación inclusiva',
         'Informe final accesible con la evaluación del impacto',
         'Recopilación de materiales accesibles y propuestas finales',
         'Recomendaciones para municipios y consolidación de la red',
@@ -340,14 +302,12 @@ export const democraciaSinBarreras: Proyecto = {
     },
     {
       nombre: 'Ayuntamiento de Getafe',
-      tipo: 'Organización socia · organismo público local',
+      tipo: 'Organización socia · organismo público local, acoge el encuentro presencial',
       pais: 'España',
     },
   ],
   resultados: [
     'Diario Político Inclusivo: herramienta digital accesible donde los participantes documentan su propio recorrido.',
-    'Guía de derechos democráticos en lectura fácil.',
-    'Mapa físico y digital accesible de espacios de participación política.',
     'Fichas accesibles del Observatorio Juvenil de Barreras y Soluciones, con recomendaciones listas para implementar.',
     'Checklist accesible de participación y hoja de ruta «Del diálogo a la incidencia».',
     'Propuestas ciudadanas accesibles trasladables a los ayuntamientos.',

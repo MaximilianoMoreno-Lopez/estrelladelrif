@@ -23,16 +23,16 @@ programa.
 ## Democracia sin barreras (KA154)
 
 **Democracia sin barreras** es un proyecto de Actividades de Participación
-Juvenil que se desarrollará entre agosto de 2026 y mayo de 2027. Trabaja el
+Juvenil que se desarrollará entre agosto de 2026 y marzo de 2027. Trabaja el
 acceso de las personas jóvenes a la vida democrática poniendo el foco en las
 barreras que lo dificultan, en particular las que encuentran las jóvenes con
 discapacidad.
 
 El consorcio lo forman Estrella del Rif y seis entidades socias, siete entidades
 en total, y prevé 30 participantes directos. Combina trabajo local continuado
-con dos encuentros presenciales en España, con las ciudades por confirmar, donde
-los grupos de los distintos territorios se reúnen para contrastar diagnósticos y
-preparar el diálogo con responsables públicos.
+con un encuentro presencial en Getafe, junto al Ayuntamiento, donde los grupos
+de los distintos territorios se reúnen para contrastar diagnósticos y preparar
+el diálogo con responsables públicos.
 
 ## Melilla is Europe (KA155)
 
