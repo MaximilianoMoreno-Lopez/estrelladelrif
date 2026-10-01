@@ -54,7 +54,7 @@ const ofrecemos = [
 ];
 
 const pedimos = [
-  'Tener entre 18 y 30 años en «Democracia sin barreras», y entre 18 y 21 en «Melilla is Europe».',
+  'Tener entre 18 y 30 años en «Democracia sin barreras» (D-Win), y entre 18 y 21 en «Melilla is Europe».',
   'Compromiso con el calendario completo de la actividad, incluidas las sesiones previas y las de evaluación.',
   'Disposición a trabajar en grupos diversos y en entornos multiculturales, con respeto por la diversidad.',
   'Voluntad de devolver algo a la ciudad: las dos actividades terminan en propuestas, materiales o acciones locales.',
@@ -134,7 +134,10 @@ const mailto = `mailto:${site.email}?subject=${asunto}`;
           <span class:list={['badge', `badge-${democraciaSinBarreras.badgeColor}`]}>
             {democraciaSinBarreras.badge}
           </span>
-          <h3>{democraciaSinBarreras.tituloCorto}</h3>
+          <h3>
+            {democraciaSinBarreras.tituloCorto}
+            {democraciaSinBarreras.acronimo && <span class="convocatoria-acronimo"> · {democraciaSinBarreras.acronimo}</span>}
+          </h3>
           <p class="convocatoria-plazas">30 plazas · de 18 a 30 años</p>
           <p class="convocatoria-texto">
             Quince jóvenes con discapacidad y quince sin discapacidad participan en todas
@@ -388,6 +391,12 @@ const mailto = `mailto:${site.email}?subject=${asunto}`;
   .convocatoria h3 {
     font-size: 1.3rem;
     color: var(--indigo);
+  }
+  .convocatoria-acronimo {
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--turquesa-texto);
   }
   .convocatoria-plazas {
     font-size: 0.85rem;

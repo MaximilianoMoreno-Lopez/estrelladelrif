@@ -20,9 +20,9 @@ por voluntariado, accede a fondos europeos. No contaba con acreditación Erasmus
 previa: se presentó a las dos acciones como entidad de nueva incorporación al
 programa.
 
-## Democracia sin barreras (KA154)
+## Democracia sin barreras, D-Win (KA154)
 
-**Democracia sin barreras** es un proyecto de Actividades de Participación
+**Democracia sin barreras** (D-Win) es un proyecto de Actividades de Participación
 Juvenil que se desarrollará entre agosto de 2026 y marzo de 2027. Trabaja el
 acceso de las personas jóvenes a la vida democrática poniendo el foco en las
 barreras que lo dificultan, en particular las que encuentran las jóvenes con

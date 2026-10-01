@@ -103,7 +103,7 @@ const jsonLd = {
 ---
 
 <BaseLayout
-  title={proyecto.tituloCorto}
+  title={proyecto.acronimo ? `${proyecto.tituloCorto} (${proyecto.acronimo})` : proyecto.tituloCorto}
   description={descripcionMeta}
   jsonLd={jsonLd}
   breadcrumbs={[
